@@ -9,6 +9,16 @@ export const localeDirection: Record<Locale, "rtl" | "ltr"> = {
   fr: "ltr",
 };
 
+/**
+ * Locale tags used for numbers and dates. Plain "ar" makes ICU print Arabic-Indic digits
+ * (٠١٢٣), but Algeria writes Western digits (0123) even in Arabic text, so formatting uses the
+ * Algerian regional variants. Message translation still uses the plain "ar" / "fr" locale.
+ */
+export const formatLocaleTag: Record<Locale, string> = {
+  ar: "ar-DZ",
+  fr: "fr-DZ",
+};
+
 export const routing = defineRouting({
   locales,
   defaultLocale,

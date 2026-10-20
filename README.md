@@ -3,7 +3,7 @@
 **Smarter Servers. Better Decisions.**
 AI-Powered Server & Infrastructure Management — a platform for running a server installation, infrastructure deployment and IT maintenance business in Algeria (Sétif and surrounding regions).
 
-> **Status: Stage 2 — authentication and access control.** Invite-only sign-in, roles (owner / sales / technician / viewer), TOTP 2FA, lockout, rate limiting, audit log and company settings are in place on top of the Stage 1 foundation. Business modules arrive in later stages. See the roadmap below.
+> **Status: Stage 3 — CRM and requirements questionnaire.** Customers, contacts, leads with a pipeline state machine, follow-ups/reminders, an append-only conversation log and a conditional, versioned requirements questionnaire (ar/fr) sit on top of Stage 2's authentication, roles and audit log. Hardware advisor, quotes and the other modules arrive in later stages. See the roadmap below.
 
 ## الملخص بالعربية
 
@@ -25,7 +25,7 @@ Next.js 16 · React 19 · TypeScript 6 · Tailwind 4 + shadcn/ui · PostgreSQL 1
 
 ## Roadmap
 
-0 Blueprint ✅ → 1 Foundation ✅ → 2 Auth/RBAC ✅ → 3 CRM → 4 Hardware & suppliers → 5 SmartQuote → 6 ProjectFlow → 7 Inventory & maintenance → 8 Backups & remote access → 9 AI → 10 Analytics → 11 Hardening.
+0 Blueprint ✅ → 1 Foundation ✅ → 2 Auth/RBAC ✅ → 3 CRM ✅ → 4 Hardware & suppliers → 5 SmartQuote → 6 ProjectFlow → 7 Inventory & maintenance → 8 Backups & remote access → 9 AI → 10 Analytics → 11 Hardening.
 
 ## Development
 

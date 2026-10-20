@@ -34,7 +34,10 @@
     "dashboard": "Tableau de bord",
     "users": "Utilisateurs",
     "audit": "Journal d'audit",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "customers": "Clients",
+    "leads": "Opportunités",
+    "followUps": "Relances"
   },
   "Roles": {
     "owner": "Propriétaire",
@@ -53,7 +56,18 @@
     "ok": "Opérationnel",
     "unavailable": "Indisponible",
     "notConfigured": "Non configuré",
-    "foundationNote": "Les modules métier (clients, devis, projets…) sont ajoutés progressivement selon la feuille de route."
+    "foundationNote": "Les modules métier (clients, devis, projets…) sont ajoutés progressivement selon la feuille de route.",
+    "crmTitle": "Clients et ventes",
+    "crmDescription": "Chiffres calculés en direct à partir de vos données réelles.",
+    "crmEmpty": "Aucune donnée pour l'instant. Commencez par ajouter un client.",
+    "prospects": "Clients en prospection",
+    "activeCustomers": "Clients actifs",
+    "newCustomers30": "Nouveaux clients (30 jours)",
+    "leadsByStage": "Opportunités par étape",
+    "openFollowUps": "Relances ouvertes",
+    "overdueFollowUps": "Relances en retard",
+    "myFollowUps": "Mes relances ouvertes",
+    "myOverdue": "Mes relances en retard"
   },
   "Auth": {
     "loginTitle": "Connexion",
@@ -174,7 +188,23 @@
       "user_role_changed": "Rôle d'un utilisateur modifié",
       "user_deactivated": "Utilisateur désactivé",
       "user_reactivated": "Utilisateur réactivé",
-      "settings_updated": "Paramètres modifiés"
+      "settings_updated": "Paramètres modifiés",
+      "customer_created": "Client créé",
+      "customer_updated": "Client modifié",
+      "customer_archived": "Client archivé",
+      "customer_restored": "Client restauré",
+      "contact_created": "Contact ajouté",
+      "contact_updated": "Contact modifié",
+      "contact_deleted": "Contact supprimé",
+      "lead_created": "Opportunité créée",
+      "lead_updated": "Opportunité modifiée",
+      "lead_status_changed": "Étape d'une opportunité modifiée",
+      "followup_created": "Relance créée",
+      "followup_completed": "Relance terminée",
+      "followup_cancelled": "Relance annulée",
+      "followup_reopened": "Relance rouverte",
+      "communication_logged": "Échange avec un client enregistré",
+      "requirements_saved": "Besoins d'une opportunité enregistrés"
     }
   },
   "Settings": {
@@ -198,5 +228,372 @@
   },
   "Loading": {
     "label": "Chargement…"
+  },
+  "Crm": {
+    "common": {
+      "search": "Rechercher",
+      "clear": "Effacer",
+      "all": "Tous",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "pageOf": "Page {page} sur {pages}",
+      "total": "{count} résultat(s)",
+      "actions": "Actions",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "add": "Ajouter",
+      "none": "—",
+      "optional": "facultatif",
+      "select": "Choisir…",
+      "saved": "Enregistré."
+    },
+    "type": {
+      "individual": "Particulier",
+      "business": "Entreprise"
+    },
+    "customerStatus": {
+      "prospect": "Prospect",
+      "active": "Actif",
+      "archived": "Archivé"
+    },
+    "language": {
+      "ar": "Arabe",
+      "fr": "Français"
+    },
+    "customers": {
+      "title": "Clients",
+      "subtitle": "Particuliers, entreprises et leurs contacts.",
+      "add": "Nouveau client",
+      "searchPlaceholder": "Rechercher par nom, téléphone ou e-mail",
+      "filterType": "Type",
+      "filterStatus": "Statut",
+      "name": "Nom",
+      "type": "Type",
+      "phone": "Téléphone",
+      "email": "E-mail",
+      "wilaya": "Wilaya",
+      "status": "Statut",
+      "openLeads": "Opportunités ouvertes",
+      "created": "Créé le",
+      "empty": "Aucun client pour l'instant.",
+      "noMatches": "Aucun résultat.",
+      "table": "Liste des clients"
+    },
+    "customerForm": {
+      "createTitle": "Nouveau client",
+      "editTitle": "Modifier le client",
+      "type": "Type de client",
+      "name": "Nom",
+      "legalName": "Raison sociale",
+      "taxId": "Numéro d'identification fiscale (NIF)",
+      "phone": "Téléphone",
+      "email": "E-mail",
+      "wilaya": "Wilaya",
+      "address": "Adresse",
+      "language": "Langue de communication préférée",
+      "notes": "Notes",
+      "invalidPhone": "Numéro de téléphone invalide.",
+      "invalidEmail": "Adresse e-mail invalide.",
+      "nameRequired": "Le nom est obligatoire (2 caractères minimum)."
+    },
+    "customer": {
+      "back": "Retour aux clients",
+      "details": "Informations",
+      "contacts": "Contacts",
+      "leads": "Opportunités",
+      "followUps": "Relances",
+      "communications": "Journal des échanges",
+      "archive": "Archiver",
+      "restore": "Restaurer",
+      "archivedNotice": "Ce client est archivé : ses données sont conservées, mais rien ne peut être ajouté ou modifié avant sa restauration.",
+      "archiveConfirm": "Archiver ce client ? Toutes ses données sont conservées et il pourra être restauré.",
+      "noLeads": "Aucune opportunité pour ce client.",
+      "createdOn": "Créé le {date}"
+    },
+    "contacts": {
+      "add": "Ajouter un contact",
+      "name": "Nom",
+      "jobTitle": "Fonction",
+      "phone": "Téléphone",
+      "email": "E-mail",
+      "primary": "Principal",
+      "makePrimary": "Définir comme principal",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer ce contact ?",
+      "empty": "Aucun contact."
+    },
+    "leads": {
+      "title": "Opportunités",
+      "subtitle": "Les étapes de chaque affaire, de la première demande à la décision.",
+      "add": "Nouvelle opportunité",
+      "table": "Liste des opportunités",
+      "titleField": "Titre",
+      "customer": "Client",
+      "status": "Étape",
+      "source": "Source",
+      "owner": "Responsable",
+      "budget": "Budget (DZD)",
+      "budgetMin": "Minimum (DZD)",
+      "budgetMax": "Maximum (DZD)",
+      "budgetRange": "Le maximum ne peut pas être inférieur au minimum.",
+      "notes": "Notes",
+      "created": "Créée le",
+      "empty": "Aucune opportunité pour l'instant.",
+      "searchPlaceholder": "Rechercher par titre ou nom du client",
+      "createTitle": "Nouvelle opportunité",
+      "editTitle": "Modifier l'opportunité",
+      "unassigned": "Non attribuée",
+      "moveTo": "Passer à l'étape",
+      "lostReason": "Motif de la perte",
+      "lostReasonPlaceholder": "Ex. : budget inférieur au besoin",
+      "confirmLost": "Confirmer la perte",
+      "noNext": "Aucune étape suivante.",
+      "closedOn": "Clôturée le {date}",
+      "requirements": "Besoins du client",
+      "customerField": "Client"
+    },
+    "leadStatus": {
+      "new": "Nouvelle",
+      "contacted": "Contactée",
+      "qualified": "Qualifiée",
+      "proposal": "Devis envoyé",
+      "won": "Gagnée",
+      "lost": "Perdue"
+    },
+    "leadSource": {
+      "referral": "Recommandation",
+      "phone": "Appel téléphonique",
+      "whatsapp": "WhatsApp",
+      "facebook": "Facebook",
+      "ouedkniss": "Ouedkniss",
+      "walk_in": "Visite directe",
+      "website": "Site web",
+      "other": "Autre"
+    },
+    "followUps": {
+      "title": "Relances et rappels",
+      "subtitle": "Les tâches à faire avec les clients et leurs échéances.",
+      "mine": "Mes relances",
+      "everyone": "Toutes",
+      "due": "Échéance",
+      "overdue": "En retard",
+      "customer": "Client",
+      "lead": "Opportunité",
+      "assignedTo": "Responsable",
+      "add": "Nouvelle relance",
+      "createTitle": "Nouvelle relance",
+      "titleField": "Titre",
+      "notes": "Notes",
+      "complete": "Terminer",
+      "cancel": "Annuler",
+      "reopen": "Rouvrir",
+      "empty": "Aucune relance.",
+      "table": "Liste des relances",
+      "status": "Statut",
+      "open": "Ouverte",
+      "done": "Terminée",
+      "cancelled": "Annulée",
+      "onlyOverdue": "En retard uniquement",
+      "dueAtRequired": "Indiquez une échéance valide."
+    },
+    "communications": {
+      "title": "Journal des échanges",
+      "hint": "Le journal est en ajout seul : les entrées ne peuvent être ni modifiées ni supprimées.",
+      "log": "Enregistrer un échange",
+      "channel": "Canal",
+      "direction": "Sens",
+      "when": "Date et heure",
+      "summary": "Résumé",
+      "empty": "Aucun échange enregistré.",
+      "lead": "Opportunité",
+      "by": "Saisi par {name}",
+      "whenHint": "Laissez vide pour utiliser l'heure actuelle."
+    },
+    "channel": {
+      "call": "Appel",
+      "whatsapp": "WhatsApp",
+      "sms": "SMS",
+      "email": "E-mail",
+      "visit": "Visite",
+      "other": "Autre"
+    },
+    "direction": {
+      "inbound": "Entrant",
+      "outbound": "Sortant"
+    },
+    "errors": {
+      "NOT_FOUND": "Élément introuvable.",
+      "CUSTOMER_ARCHIVED": "Le client est archivé. Restaurez-le d'abord.",
+      "HAS_OPEN_LEADS": "Clôturez les opportunités ouvertes de ce client avant de l'archiver.",
+      "INVALID_TRANSITION": "Cette étape n'est pas accessible depuis l'étape actuelle.",
+      "LOST_REASON_REQUIRED": "Le motif de la perte est obligatoire.",
+      "INVALID_OWNER": "L'opportunité ne peut pas être attribuée à cet utilisateur.",
+      "INVALID_ASSIGNEE": "La relance ne peut pas être attribuée à cet utilisateur.",
+      "LEAD_CLOSED": "L'opportunité est clôturée. Rouvrez-la pour la modifier.",
+      "LEAD_CUSTOMER_MISMATCH": "L'opportunité appartient à un autre client.",
+      "FUTURE_DATE": "La date d'un échange ne peut pas être dans le futur.",
+      "UNKNOWN_QUESTIONNAIRE_VERSION": "Version du questionnaire inconnue.",
+      "VALIDATION": "Vérifiez les champs saisis.",
+      "FORBIDDEN": "Vous n'avez pas l'autorisation d'effectuer cette action.",
+      "UNAUTHORIZED": "Session expirée. Reconnectez-vous.",
+      "UNKNOWN": "Une erreur inattendue s'est produite."
+    }
+  },
+  "Requirements": {
+    "title": "Besoins du client",
+    "subtitle": "Recueillez ici les besoins techniques du client pour choisir le bon matériel et préparer le devis. Les questions s'adaptent à vos réponses.",
+    "version": "Version {version}",
+    "statusDraft": "Brouillon",
+    "statusComplete": "Complet",
+    "notStarted": "Les besoins n'ont pas encore été recueillis.",
+    "saveDraft": "Enregistrer le brouillon",
+    "markComplete": "Enregistrer et terminer",
+    "savedDraft": "Brouillon enregistré.",
+    "savedComplete": "Besoins enregistrés comme complets.",
+    "readOnly": "L'opportunité est clôturée : les besoins sont en lecture seule.",
+    "incomplete": "Renseignez les champs obligatoires signalés.",
+    "select": "Choisir…",
+    "yes": "Oui",
+    "no": "Non",
+    "required": "obligatoire",
+    "sections": {
+      "usage": "Usages",
+      "budget": "Budget",
+      "performance": "Performance",
+      "storage": "Stockage",
+      "network": "Réseau",
+      "environment": "Environnement, énergie et bruit",
+      "remote": "Accès à distance",
+      "backup": "Sauvegarde",
+      "growth": "Évolution prévue"
+    },
+    "q": {
+      "workloads": "Quels usages pour le serveur ?",
+      "workloadsOther": "Précisez l'autre usage",
+      "concurrentUsers": "Nombre d'utilisateurs simultanés prévu",
+      "containerCount": "Nombre de conteneurs (Docker) prévu",
+      "vmCount": "Nombre de machines virtuelles prévu",
+      "cameraCount": "Nombre de caméras de surveillance",
+      "homeDeviceCount": "Nombre d'appareils domotiques",
+      "budgetMinDzd": "Budget minimum (DZD)",
+      "budgetMaxDzd": "Budget maximum (DZD)",
+      "ramGb": "Mémoire vive souhaitée",
+      "cpuPriority": "Priorité du processeur",
+      "gpuNeeded": "Un processeur graphique (GPU) est-il nécessaire ?",
+      "storageTb": "Capacité de stockage souhaitée (To)",
+      "redundancy": "Niveau de protection contre la panne de disque",
+      "storageMedia": "Type de stockage",
+      "lanSpeed": "Débit du réseau local",
+      "vlanNeeded": "Faut-il segmenter le réseau (VLAN) ?",
+      "wifiNeeded": "Faut-il un réseau sans fil ?",
+      "networkDevices": "Nombre d'appareils connectés au réseau",
+      "alwaysOn": "Le serveur fonctionne-t-il 24 h/24 ?",
+      "maxPowerWatts": "Consommation électrique maximale (W)",
+      "upsNeeded": "Faut-il un onduleur (UPS) ?",
+      "noiseLevel": "Niveau de bruit acceptable",
+      "installLocation": "Lieu d'installation",
+      "needsRemoteAccess": "Un accès à distance est-il nécessaire ?",
+      "remoteMethod": "Méthode d'accès à distance préférée",
+      "publicExposure": "Des services doivent-ils être exposés sur Internet ?",
+      "needsBackup": "Des sauvegardes sont-elles nécessaires ?",
+      "offsiteBackup": "Faut-il une copie hors site ?",
+      "rpoHours": "Perte de données maximale acceptable",
+      "growth2y": "Croissance attendue sur deux ans",
+      "notes": "Remarques complémentaires"
+    },
+    "hint": {
+      "publicExposure": "L'exposition sur Internet exige des mesures de sécurité supplémentaires, documentées dans le plan d'exécution.",
+      "noiseLevel": "Influence le choix des ventilateurs, du boîtier et de l'emplacement.",
+      "budgetMaxDzd": "En dinars algériens. C'est une estimation du client, pas un prix."
+    },
+    "o": {
+      "workloads": {
+        "file_storage": "Stockage et fichiers (NAS)",
+        "containers": "Conteneurs Docker",
+        "home_automation": "Domotique (Home Assistant)",
+        "virtualization": "Virtualisation (Proxmox / VM)",
+        "media": "Multimédia (Plex / Jellyfin)",
+        "backup_target": "Cible de sauvegarde",
+        "surveillance": "Vidéosurveillance (NVR)",
+        "remote_access_vpn": "Accès à distance / VPN",
+        "web_hosting": "Hébergement web",
+        "dev_test": "Développement et tests",
+        "other": "Autre"
+      },
+      "ramGb": {
+        "8": "8 Go",
+        "16": "16 Go",
+        "32": "32 Go",
+        "64": "64 Go",
+        "128": "128 Go",
+        "256": "256 Go",
+        "unsure": "Je ne sais pas"
+      },
+      "cpuPriority": {
+        "low_power": "Faible consommation",
+        "balanced": "Équilibré",
+        "performance": "Performance maximale"
+      },
+      "redundancy": {
+        "none": "Aucune protection",
+        "mirror": "Miroir (RAID 1)",
+        "raid5": "RAID 5",
+        "raid6": "RAID 6",
+        "unsure": "Je ne sais pas"
+      },
+      "storageMedia": {
+        "ssd": "SSD",
+        "hdd": "HDD",
+        "mixed": "Mixte",
+        "unsure": "Je ne sais pas"
+      },
+      "lanSpeed": {
+        "1g": "1 Gbit/s",
+        "2_5g": "2,5 Gbit/s",
+        "10g": "10 Gbit/s",
+        "unsure": "Je ne sais pas"
+      },
+      "noiseLevel": {
+        "silent": "Totalement silencieux",
+        "quiet": "Silencieux",
+        "normal": "Normal",
+        "loud_ok": "Le bruit n'a pas d'importance"
+      },
+      "installLocation": {
+        "living_room": "Salon",
+        "office": "Bureau",
+        "server_room": "Salle serveur",
+        "garage_shop": "Atelier / garage",
+        "other": "Autre"
+      },
+      "remoteMethod": {
+        "tailscale": "Tailscale",
+        "wireguard": "WireGuard",
+        "other_vpn": "Autre VPN",
+        "port_forward": "Redirection de ports (déconseillé)",
+        "unsure": "Je ne sais pas"
+      },
+      "rpoHours": {
+        "1": "Une heure",
+        "24": "Un jour",
+        "168": "Une semaine",
+        "unsure": "Je ne sais pas"
+      },
+      "growth2y": {
+        "none": "Aucune croissance",
+        "some": "Croissance modérée",
+        "high": "Forte croissance"
+      }
+    },
+    "errors": {
+      "required": "Ce champ est obligatoire.",
+      "invalid_type": "Valeur invalide.",
+      "invalid_option": "Choix invalide.",
+      "too_small": "La valeur est inférieure au minimum autorisé.",
+      "too_large": "La valeur dépasse le maximum autorisé.",
+      "too_long": "Le texte est trop long.",
+      "not_integer": "Un nombre entier est attendu.",
+      "below_minimum_question": "Ne peut pas être inférieur au minimum saisi."
+    }
   }
 }

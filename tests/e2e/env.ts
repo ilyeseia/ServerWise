@@ -6,6 +6,8 @@ export const E2E_PORT = Number(process.env.E2E_PORT ?? 3100);
 export const E2E_URL = `http://localhost:${E2E_PORT}`;
 export const E2E_AUTH_SECRET = "e2e-only-secret-0123456789-abcdefghijklmnopqrstuvwxyz";
 export const E2E_EMAIL_DOMAIN = "e2e.example.test";
+/** Every CRM record created by e2e starts with this, so teardown can find and remove it. */
+export const E2E_DATA_PREFIX = "ZZ E2E";
 
 export const serverEnv = {
   APP_URL: E2E_URL,
@@ -14,12 +16,20 @@ export const serverEnv = {
   REQUIRE_OWNER_2FA: "false",
 };
 
-export type E2ERole = "owner" | "sales" | "viewer" | "forced";
+export type E2ERole = "owner" | "sales" | "technician" | "viewer" | "forced";
 export interface E2EUser {
   email: string;
   password: string;
 }
 export type E2EUsers = Record<E2ERole, E2EUser>;
+
+/** A ready-made customer with a lead, an overdue follow-up and a logged conversation. */
+export interface E2EFixture {
+  customerId: string;
+  customerName: string;
+  leadId: string;
+  leadTitle: string;
+}
 
 /** Where the seed writes each role's signed-in browser state. */
 export const authFile = (role: E2ERole) => `tests/e2e/.auth/${role}.json`;

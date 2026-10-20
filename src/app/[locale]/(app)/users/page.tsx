@@ -1,4 +1,5 @@
-import { getFormatter, setRequestLocale } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
+import { getAppFormatter } from "@/i18n/format";
 import { resolveLocale } from "@/i18n/locale";
 import { listUsers } from "@/modules/users/service";
 import { requirePagePermission } from "@/server/auth/page-guard";
@@ -16,7 +17,7 @@ export default async function UsersPage({ params }: Props) {
   const session = await requirePagePermission("user:read");
   const [users, format] = await Promise.all([
     listUsers({ actor: session.actor, headers: await headers() }),
-    getFormatter(),
+    getAppFormatter(),
   ]);
 
   const rows = users.map((u) => ({

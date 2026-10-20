@@ -1,4 +1,5 @@
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getAppFormatter } from "@/i18n/format";
 import { Table, Td, Th } from "@/components/ui/table";
 import { resolveLocale } from "@/i18n/locale";
 import { AUDIT_ACTIONS, auditMessageKey, listAudit, type AuditAction } from "@/server/audit";
@@ -15,7 +16,7 @@ export default async function AuditPage({ params }: Props) {
 
   const [t, format, rows] = await Promise.all([
     getTranslations("Audit"),
-    getFormatter(),
+    getAppFormatter(),
     listAudit(session.actor, { limit: 200 }),
   ]);
   // Message keys cannot contain dots (next-intl nests on them): "auth.login.success" -> "auth_login_success".

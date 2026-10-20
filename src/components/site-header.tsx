@@ -11,12 +11,17 @@ export interface HeaderUser {
   role: Role;
 }
 
+type NavKey = "dashboard" | "customers" | "leads" | "followUps" | "users" | "audit" | "settings";
+
 const NAV: {
-  href: "/dashboard" | "/users" | "/audit" | "/settings";
-  key: string;
+  href: "/dashboard" | "/customers" | "/leads" | "/follow-ups" | "/users" | "/audit" | "/settings";
+  key: NavKey;
   permission: Permission;
 }[] = [
   { href: "/dashboard", key: "dashboard", permission: "dashboard:view" },
+  { href: "/customers", key: "customers", permission: "crm:read" },
+  { href: "/leads", key: "leads", permission: "crm:read" },
+  { href: "/follow-ups", key: "followUps", permission: "crm:read" },
   { href: "/users", key: "users", permission: "user:read" },
   { href: "/audit", key: "audit", permission: "audit:read" },
   { href: "/settings", key: "settings", permission: "settings:read" },
@@ -51,7 +56,7 @@ export function SiteHeader({ user, gated = false }: { user: HeaderUser | null; g
                 {items.map((item) => (
                   <li key={item.href}>
                     <Link href={item.href} className="font-medium hover:text-primary">
-                      {tn(item.key as "dashboard" | "users" | "audit" | "settings")}
+                      {tn(item.key)}
                     </Link>
                   </li>
                 ))}

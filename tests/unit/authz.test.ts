@@ -22,6 +22,9 @@ const EXPECTED: Record<Role, Record<Permission, boolean>> = {
     "settings:read": true,
     "settings:update": true,
     "audit:read": true,
+    "crm:read": true,
+    "crm:write": true,
+    "crm:archive": true,
   },
   sales: {
     "dashboard:view": true,
@@ -30,6 +33,9 @@ const EXPECTED: Record<Role, Record<Permission, boolean>> = {
     "settings:read": true,
     "settings:update": false,
     "audit:read": false,
+    "crm:read": true,
+    "crm:write": true,
+    "crm:archive": false,
   },
   technician: {
     "dashboard:view": true,
@@ -38,6 +44,9 @@ const EXPECTED: Record<Role, Record<Permission, boolean>> = {
     "settings:read": true,
     "settings:update": false,
     "audit:read": false,
+    "crm:read": true,
+    "crm:write": false,
+    "crm:archive": false,
   },
   viewer: {
     "dashboard:view": true,
@@ -46,6 +55,9 @@ const EXPECTED: Record<Role, Record<Permission, boolean>> = {
     "settings:read": false,
     "settings:update": false,
     "audit:read": false,
+    "crm:read": false,
+    "crm:write": false,
+    "crm:archive": false,
   },
 };
 

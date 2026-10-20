@@ -44,6 +44,15 @@ docs/
 `User, Session, Role, AuditLog, Setting` · `Customer, Contact, Lead, FollowUp, Communication` · `Questionnaire(version), Question, Answer` · `Product, ProductSpec, Supplier, SupplierOffer(price, currency, source, condition, location, warranty, availability, verificationStatus, checkedAt)` · `Recommendation, RecommendationFactor` · `Quote, QuoteRevision, QuoteLine, PricingRule, TaxRule` · `Project, Task, Milestone, TaskDependency, TestResult, HandoverDoc` · `Asset, Service, NetworkDevice, Subscription` · `Ticket, MaintenanceContract, MaintenanceSchedule, ServiceReport` · `BackupPolicy, BackupRecord, RestoreTest` · `RemoteAccessPlan` · `AiConversation, AiToolCall` .
 Conventions: UUIDv7/cuid ids, `createdAt/updatedAt`, soft-delete only where history matters, `numeric(14,2)` money, CHECK constraints, FK with explicit `onDelete`, indexes for every lookup/filter used by list pages. Detailed schema is produced per stage.
 
+**Implemented in Stage 3 (CRM, `src/modules/crm`, `src/modules/questionnaire`):**
+
+- Tables `customer`, `contact`, `lead`, `follow_up`, `communication`, `requirements_response`. Customers are never deleted: `archived` hides them and keeps history (`customer → lead/follow_up/communication` use `ON DELETE RESTRICT`).
+- Rules enforced **in the database** as well as in code: wilaya 1..58, non-blank names, at most one primary contact per customer (partial unique index), lead budget range and non-negative amounts, a lost lead needs a reason, `closedAt` is set exactly when a lead is won/lost, a follow-up is `done` exactly when it has a completion time, an archived customer has an archive date, and the communication log is append-only (trigger).
+- **Lead pipeline** is an explicit state machine (`lead-status.ts`): `new → contacted → qualified → proposal → won`, `lost` from any open stage, and `lost → contacted` to reopen. Winning a lead activates its customer in the same transaction.
+- **Questionnaire definitions live in code** (`definition.ts`), versioned and reviewed in Git; each stored response records its `version` and keeps rendering with that version. A new version is added, never edited in place. The conditional engine (`engine.ts`) is pure: visible questions are computed from the answers of questions that are themselves visible, so a stale hidden answer can neither reveal nor hide anything. Database-managed, owner-editable questionnaires are a possible later extension; they are not needed to run the business today.
+- Every service follows `assertCan` → zod parse → Prisma transaction that also writes the audit row. Server actions return a result with an error *code*; the UI translates codes (`Crm.errors.*`).
+- Numbers and dates are formatted with the Algerian regional locales (`ar-DZ`, `fr-DZ`) so Arabic text uses Western digits (0-9).
+
 ## 5. Key flows
 
 - **Enquiry → quote:** Lead → questionnaire → advisor ranks products using fresh verified offers → quote draft → review → issue (snapshot) → accept → project.

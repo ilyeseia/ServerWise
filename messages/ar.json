@@ -34,7 +34,10 @@
     "dashboard": "لوحة التحكم",
     "users": "المستخدمون",
     "audit": "سجل التدقيق",
-    "settings": "الإعدادات"
+    "settings": "الإعدادات",
+    "customers": "العملاء",
+    "leads": "العملاء المحتملون",
+    "followUps": "المتابعات"
   },
   "Roles": {
     "owner": "مالك",
@@ -53,7 +56,18 @@
     "ok": "يعمل",
     "unavailable": "غير متاح",
     "notConfigured": "غير مُهيَّأ",
-    "foundationNote": "وحدات الأعمال (العملاء، العروض، المشاريع…) تُضاف تباعًا وفق خارطة الطريق."
+    "foundationNote": "وحدات الأعمال (العملاء، العروض، المشاريع…) تُضاف تباعًا وفق خارطة الطريق.",
+    "crmTitle": "العملاء والمبيعات",
+    "crmDescription": "أرقام محسوبة مباشرة من بياناتك الفعلية.",
+    "crmEmpty": "لا توجد بيانات بعد. ابدأ بإضافة عميل.",
+    "prospects": "عملاء قيد الاستقطاب",
+    "activeCustomers": "عملاء نشطون",
+    "newCustomers30": "عملاء جدد خلال 30 يومًا",
+    "leadsByStage": "العملاء المحتملون حسب المرحلة",
+    "openFollowUps": "متابعات مفتوحة",
+    "overdueFollowUps": "متابعات متأخرة",
+    "myFollowUps": "متابعاتي المفتوحة",
+    "myOverdue": "المتأخرة من متابعاتي"
   },
   "Auth": {
     "loginTitle": "تسجيل الدخول",
@@ -174,7 +188,23 @@
       "user_role_changed": "تغيير دور مستخدم",
       "user_deactivated": "تعطيل مستخدم",
       "user_reactivated": "إعادة تفعيل مستخدم",
-      "settings_updated": "تعديل الإعدادات"
+      "settings_updated": "تعديل الإعدادات",
+      "customer_created": "إنشاء عميل",
+      "customer_updated": "تعديل بيانات عميل",
+      "customer_archived": "أرشفة عميل",
+      "customer_restored": "استعادة عميل من الأرشيف",
+      "contact_created": "إضافة جهة اتصال",
+      "contact_updated": "تعديل جهة اتصال",
+      "contact_deleted": "حذف جهة اتصال",
+      "lead_created": "إنشاء عميل محتمل",
+      "lead_updated": "تعديل عميل محتمل",
+      "lead_status_changed": "تغيير مرحلة عميل محتمل",
+      "followup_created": "إنشاء متابعة",
+      "followup_completed": "إتمام متابعة",
+      "followup_cancelled": "إلغاء متابعة",
+      "followup_reopened": "إعادة فتح متابعة",
+      "communication_logged": "تسجيل تواصل مع عميل",
+      "requirements_saved": "حفظ متطلبات عميل محتمل"
     }
   },
   "Settings": {
@@ -198,5 +228,372 @@
   },
   "Loading": {
     "label": "جارٍ التحميل…"
+  },
+  "Crm": {
+    "common": {
+      "search": "بحث",
+      "clear": "مسح",
+      "all": "الكل",
+      "previous": "السابق",
+      "next": "التالي",
+      "pageOf": "صفحة {page} من {pages}",
+      "total": "{count} نتيجة",
+      "actions": "إجراءات",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "add": "إضافة",
+      "none": "—",
+      "optional": "اختياري",
+      "select": "اختر…",
+      "saved": "تم الحفظ."
+    },
+    "type": {
+      "individual": "فرد",
+      "business": "شركة"
+    },
+    "customerStatus": {
+      "prospect": "محتمل",
+      "active": "نشط",
+      "archived": "مؤرشف"
+    },
+    "language": {
+      "ar": "العربية",
+      "fr": "الفرنسية"
+    },
+    "customers": {
+      "title": "العملاء",
+      "subtitle": "الأفراد والشركات وجهات الاتصال الخاصة بهم.",
+      "add": "عميل جديد",
+      "searchPlaceholder": "ابحث بالاسم أو الهاتف أو البريد",
+      "filterType": "النوع",
+      "filterStatus": "الحالة",
+      "name": "الاسم",
+      "type": "النوع",
+      "phone": "الهاتف",
+      "email": "البريد الإلكتروني",
+      "wilaya": "الولاية",
+      "status": "الحالة",
+      "openLeads": "عملاء محتملون مفتوحون",
+      "created": "تاريخ الإنشاء",
+      "empty": "لا يوجد عملاء بعد.",
+      "noMatches": "لا توجد نتائج مطابقة.",
+      "table": "قائمة العملاء"
+    },
+    "customerForm": {
+      "createTitle": "عميل جديد",
+      "editTitle": "تعديل بيانات العميل",
+      "type": "نوع العميل",
+      "name": "الاسم",
+      "legalName": "الاسم القانوني للشركة",
+      "taxId": "الرقم الجبائي (NIF)",
+      "phone": "الهاتف",
+      "email": "البريد الإلكتروني",
+      "wilaya": "الولاية",
+      "address": "العنوان",
+      "language": "اللغة المفضلة للتواصل",
+      "notes": "ملاحظات",
+      "invalidPhone": "رقم هاتف غير صالح.",
+      "invalidEmail": "بريد إلكتروني غير صالح.",
+      "nameRequired": "الاسم مطلوب (حرفان على الأقل)."
+    },
+    "customer": {
+      "back": "العودة إلى العملاء",
+      "details": "البيانات الأساسية",
+      "contacts": "جهات الاتصال",
+      "leads": "العملاء المحتملون (الفرص)",
+      "followUps": "المتابعات",
+      "communications": "سجل التواصل",
+      "archive": "أرشفة",
+      "restore": "استعادة",
+      "archivedNotice": "هذا العميل مؤرشف: البيانات محفوظة لكن لا يمكن إضافة أو تعديل شيء قبل استعادته.",
+      "archiveConfirm": "أرشفة هذا العميل؟ تبقى كل بياناته محفوظة ويمكن استعادته.",
+      "noLeads": "لا توجد فرص لهذا العميل.",
+      "createdOn": "أُنشئ في {date}"
+    },
+    "contacts": {
+      "add": "إضافة جهة اتصال",
+      "name": "الاسم",
+      "jobTitle": "المسمى الوظيفي",
+      "phone": "الهاتف",
+      "email": "البريد الإلكتروني",
+      "primary": "أساسية",
+      "makePrimary": "جعلها أساسية",
+      "delete": "حذف",
+      "deleteConfirm": "حذف جهة الاتصال هذه؟",
+      "empty": "لا توجد جهات اتصال."
+    },
+    "leads": {
+      "title": "العملاء المحتملون",
+      "subtitle": "مراحل التعامل مع كل فرصة من أول استفسار حتى القرار.",
+      "add": "فرصة جديدة",
+      "table": "قائمة الفرص",
+      "titleField": "العنوان",
+      "customer": "العميل",
+      "status": "المرحلة",
+      "source": "المصدر",
+      "owner": "المسؤول",
+      "budget": "الميزانية (دج)",
+      "budgetMin": "الحد الأدنى (دج)",
+      "budgetMax": "الحد الأقصى (دج)",
+      "budgetRange": "الحد الأقصى يجب ألا يقل عن الأدنى.",
+      "notes": "ملاحظات",
+      "created": "تاريخ الإنشاء",
+      "empty": "لا توجد فرص بعد.",
+      "searchPlaceholder": "ابحث بالعنوان أو اسم العميل",
+      "createTitle": "فرصة جديدة",
+      "editTitle": "تعديل الفرصة",
+      "unassigned": "غير مُسنَدة",
+      "moveTo": "نقل إلى مرحلة",
+      "lostReason": "سبب الخسارة",
+      "lostReasonPlaceholder": "مثال: الميزانية أقل من المطلوب",
+      "confirmLost": "تأكيد الخسارة",
+      "noNext": "لا توجد مراحل تالية.",
+      "closedOn": "أُغلقت في {date}",
+      "requirements": "متطلبات العميل",
+      "customerField": "العميل"
+    },
+    "leadStatus": {
+      "new": "جديد",
+      "contacted": "تم التواصل",
+      "qualified": "مؤهَّل",
+      "proposal": "عرض سعر",
+      "won": "مكسوب",
+      "lost": "خسارة"
+    },
+    "leadSource": {
+      "referral": "توصية",
+      "phone": "اتصال هاتفي",
+      "whatsapp": "واتساب",
+      "facebook": "فيسبوك",
+      "ouedkniss": "ودكنيس",
+      "walk_in": "زيارة مباشرة",
+      "website": "الموقع",
+      "other": "أخرى"
+    },
+    "followUps": {
+      "title": "المتابعات والتذكيرات",
+      "subtitle": "المهام المطلوب تنفيذها مع العملاء ومواعيدها.",
+      "mine": "متابعاتي",
+      "everyone": "الجميع",
+      "due": "الموعد",
+      "overdue": "متأخرة",
+      "customer": "العميل",
+      "lead": "الفرصة",
+      "assignedTo": "المسؤول",
+      "add": "متابعة جديدة",
+      "createTitle": "متابعة جديدة",
+      "titleField": "العنوان",
+      "notes": "ملاحظات",
+      "complete": "إتمام",
+      "cancel": "إلغاء",
+      "reopen": "إعادة فتح",
+      "empty": "لا توجد متابعات.",
+      "table": "قائمة المتابعات",
+      "status": "الحالة",
+      "open": "مفتوحة",
+      "done": "منجزة",
+      "cancelled": "ملغاة",
+      "onlyOverdue": "المتأخرة فقط",
+      "dueAtRequired": "حدد موعدًا صالحًا."
+    },
+    "communications": {
+      "title": "سجل التواصل",
+      "hint": "السجل للإضافة فقط: لا يمكن تعديل الإدخالات أو حذفها.",
+      "log": "تسجيل تواصل",
+      "channel": "الوسيلة",
+      "direction": "الاتجاه",
+      "when": "وقت التواصل",
+      "summary": "الملخص",
+      "empty": "لا يوجد تواصل مسجَّل.",
+      "lead": "الفرصة",
+      "by": "سجَّله {name}",
+      "whenHint": "اتركه فارغًا لاستخدام الوقت الحالي."
+    },
+    "channel": {
+      "call": "مكالمة",
+      "whatsapp": "واتساب",
+      "sms": "رسالة نصية",
+      "email": "بريد إلكتروني",
+      "visit": "زيارة",
+      "other": "أخرى"
+    },
+    "direction": {
+      "inbound": "وارد",
+      "outbound": "صادر"
+    },
+    "errors": {
+      "NOT_FOUND": "العنصر غير موجود.",
+      "CUSTOMER_ARCHIVED": "العميل مؤرشف. استعده أولًا.",
+      "HAS_OPEN_LEADS": "أغلق الفرص المفتوحة لهذا العميل قبل أرشفته.",
+      "INVALID_TRANSITION": "لا يمكن الانتقال إلى هذه المرحلة من المرحلة الحالية.",
+      "LOST_REASON_REQUIRED": "سبب الخسارة مطلوب.",
+      "INVALID_OWNER": "لا يمكن إسناد الفرصة إلى هذا المستخدم.",
+      "INVALID_ASSIGNEE": "لا يمكن إسناد المتابعة إلى هذا المستخدم.",
+      "LEAD_CLOSED": "الفرصة مغلقة. أعد فتحها للتعديل.",
+      "LEAD_CUSTOMER_MISMATCH": "الفرصة تخص عميلًا آخر.",
+      "FUTURE_DATE": "لا يمكن أن يكون تاريخ التواصل في المستقبل.",
+      "UNKNOWN_QUESTIONNAIRE_VERSION": "إصدار الاستبيان غير معروف.",
+      "VALIDATION": "تحقق من الحقول المُدخلة.",
+      "FORBIDDEN": "ليست لديك صلاحية لهذا الإجراء.",
+      "UNAUTHORIZED": "انتهت الجلسة. سجِّل الدخول من جديد.",
+      "UNKNOWN": "حدث خطأ غير متوقع."
+    }
+  },
+  "Requirements": {
+    "title": "متطلبات العميل",
+    "subtitle": "تُجمع هنا احتياجات العميل التقنية لاختيار الجهاز المناسب وإعداد العرض. تظهر الأسئلة حسب إجاباتك.",
+    "version": "الإصدار {version}",
+    "statusDraft": "مسودة",
+    "statusComplete": "مكتملة",
+    "notStarted": "لم تُجمع المتطلبات بعد.",
+    "saveDraft": "حفظ كمسودة",
+    "markComplete": "حفظ وإكمال",
+    "savedDraft": "تم حفظ المسودة.",
+    "savedComplete": "تم حفظ المتطلبات كاملة.",
+    "readOnly": "الفرصة مغلقة: المتطلبات للقراءة فقط.",
+    "incomplete": "أكمل الحقول المطلوبة المُشار إليها.",
+    "select": "اختر…",
+    "yes": "نعم",
+    "no": "لا",
+    "required": "مطلوب",
+    "sections": {
+      "usage": "الاستخدام",
+      "budget": "الميزانية",
+      "performance": "الأداء",
+      "storage": "التخزين",
+      "network": "الشبكة",
+      "environment": "البيئة والطاقة والضجيج",
+      "remote": "الوصول عن بُعد",
+      "backup": "النسخ الاحتياطي",
+      "growth": "النمو المستقبلي"
+    },
+    "q": {
+      "workloads": "ما الاستخدامات المطلوبة للخادم؟",
+      "workloadsOther": "اذكر الاستخدام الآخر",
+      "concurrentUsers": "عدد المستخدمين المتزامنين المتوقع",
+      "containerCount": "عدد الحاويات (Docker) المتوقع",
+      "vmCount": "عدد الأجهزة الافتراضية المتوقع",
+      "cameraCount": "عدد كاميرات المراقبة",
+      "homeDeviceCount": "عدد أجهزة المنزل الذكي",
+      "budgetMinDzd": "الحد الأدنى للميزانية (دج)",
+      "budgetMaxDzd": "الحد الأقصى للميزانية (دج)",
+      "ramGb": "الذاكرة العشوائية المطلوبة",
+      "cpuPriority": "أولوية المعالج",
+      "gpuNeeded": "هل تحتاج إلى معالج رسوميات (GPU)؟",
+      "storageTb": "سعة التخزين المطلوبة (تيرابايت)",
+      "redundancy": "مستوى الحماية من تعطل الأقراص",
+      "storageMedia": "نوع وسائط التخزين",
+      "lanSpeed": "سرعة الشبكة المحلية",
+      "vlanNeeded": "هل تحتاج إلى فصل الشبكة (VLAN)؟",
+      "wifiNeeded": "هل تحتاج إلى شبكة لاسلكية؟",
+      "networkDevices": "عدد الأجهزة المتصلة بالشبكة",
+      "alwaysOn": "هل يعمل الخادم على مدار الساعة؟",
+      "maxPowerWatts": "الحد الأقصى لاستهلاك الطاقة (واط)",
+      "upsNeeded": "هل تحتاج إلى مصدر طاقة احتياطي (UPS)؟",
+      "noiseLevel": "مستوى الضجيج المقبول",
+      "installLocation": "مكان التركيب",
+      "needsRemoteAccess": "هل تحتاج إلى وصول عن بُعد؟",
+      "remoteMethod": "طريقة الوصول عن بُعد المفضلة",
+      "publicExposure": "هل تريد إتاحة خدمات للإنترنت العام؟",
+      "needsBackup": "هل تحتاج إلى نسخ احتياطي؟",
+      "offsiteBackup": "هل تريد نسخة خارج الموقع؟",
+      "rpoHours": "أقصى فترة مقبولة لفقدان البيانات",
+      "growth2y": "النمو المتوقع خلال سنتين",
+      "notes": "ملاحظات إضافية"
+    },
+    "hint": {
+      "publicExposure": "الإتاحة للإنترنت العام تتطلب إجراءات أمنية إضافية وتُوثَّق في خطة التنفيذ.",
+      "noiseLevel": "يؤثر على اختيار المراوح والعلبة ومكان التركيب.",
+      "budgetMaxDzd": "بالدينار الجزائري. هذا تقدير من العميل وليس سعرًا."
+    },
+    "o": {
+      "workloads": {
+        "file_storage": "تخزين وملفات (NAS)",
+        "containers": "حاويات Docker",
+        "home_automation": "المنزل الذكي (Home Assistant)",
+        "virtualization": "افتراضية (Proxmox / أجهزة افتراضية)",
+        "media": "وسائط (Plex / Jellyfin)",
+        "backup_target": "وجهة للنسخ الاحتياطي",
+        "surveillance": "مراقبة بالكاميرات (NVR)",
+        "remote_access_vpn": "وصول عن بُعد / VPN",
+        "web_hosting": "استضافة مواقع",
+        "dev_test": "تطوير واختبار",
+        "other": "أخرى"
+      },
+      "ramGb": {
+        "8": "8 جيجابايت",
+        "16": "16 جيجابايت",
+        "32": "32 جيجابايت",
+        "64": "64 جيجابايت",
+        "128": "128 جيجابايت",
+        "256": "256 جيجابايت",
+        "unsure": "لست متأكدًا"
+      },
+      "cpuPriority": {
+        "low_power": "استهلاك منخفض للطاقة",
+        "balanced": "متوازن",
+        "performance": "أداء أعلى"
+      },
+      "redundancy": {
+        "none": "بدون حماية",
+        "mirror": "نسخة مرآة (RAID 1)",
+        "raid5": "RAID 5",
+        "raid6": "RAID 6",
+        "unsure": "لست متأكدًا"
+      },
+      "storageMedia": {
+        "ssd": "SSD",
+        "hdd": "HDD",
+        "mixed": "مختلط",
+        "unsure": "لست متأكدًا"
+      },
+      "lanSpeed": {
+        "1g": "1 جيجابت/ث",
+        "2_5g": "2.5 جيجابت/ث",
+        "10g": "10 جيجابت/ث",
+        "unsure": "لست متأكدًا"
+      },
+      "noiseLevel": {
+        "silent": "صامت تمامًا",
+        "quiet": "هادئ",
+        "normal": "عادي",
+        "loud_ok": "الضجيج غير مهم"
+      },
+      "installLocation": {
+        "living_room": "غرفة معيشة",
+        "office": "مكتب",
+        "server_room": "غرفة خوادم",
+        "garage_shop": "ورشة / مرآب",
+        "other": "أخرى"
+      },
+      "remoteMethod": {
+        "tailscale": "Tailscale",
+        "wireguard": "WireGuard",
+        "other_vpn": "VPN آخر",
+        "port_forward": "فتح منافذ (غير مفضَّل)",
+        "unsure": "لست متأكدًا"
+      },
+      "rpoHours": {
+        "1": "ساعة واحدة",
+        "24": "يوم واحد",
+        "168": "أسبوع",
+        "unsure": "لست متأكدًا"
+      },
+      "growth2y": {
+        "none": "لا نمو",
+        "some": "نمو متوسط",
+        "high": "نمو كبير"
+      }
+    },
+    "errors": {
+      "required": "هذا الحقل مطلوب.",
+      "invalid_type": "قيمة غير صالحة.",
+      "invalid_option": "اختيار غير صالح.",
+      "too_small": "القيمة أقل من الحد المسموح.",
+      "too_large": "القيمة أكبر من الحد المسموح.",
+      "too_long": "النص طويل جدًا.",
+      "not_integer": "يجب أن يكون عددًا صحيحًا.",
+      "below_minimum_question": "يجب ألا تقل عن الحد الأدنى المُدخل."
+    }
   }
 }

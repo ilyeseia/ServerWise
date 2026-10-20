@@ -24,13 +24,13 @@ model AppSetting {
 }
 
 model User {
-  id            String    @id
+  id            String   @id
   name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
+  email         String   @unique
+  emailVerified Boolean  @default(false)
   image         String?
-  createdAt     DateTime  @default(now()) @db.Timestamptz(3)
-  updatedAt     DateTime  @default(now()) @updatedAt @db.Timestamptz(3)
+  createdAt     DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime @default(now()) @updatedAt @db.Timestamptz(3)
 
   // admin plugin
   role       String?
@@ -49,6 +49,10 @@ model User {
   sessions   Session[]
   accounts   Account[]
   twoFactors TwoFactor[]
+
+  // CRM ownership (set null when a user is removed so customer history is kept)
+  ownedLeads        Lead[]     @relation("LeadOwner")
+  assignedFollowUps FollowUp[] @relation("FollowUpAssignee")
 
   @@map("user")
 }
@@ -142,4 +146,215 @@ model AuditLog {
   @@index([action])
   @@index([actorId])
   @@map("audit_log")
+}
+
+// ---------------------------------------------------------------------------------------------
+// CRM (Stage 3)
+// ---------------------------------------------------------------------------------------------
+
+enum CustomerType {
+  individual
+  business
+}
+
+/// prospect: created from an enquiry; active: has won work; archived: hidden, history kept.
+enum CustomerStatus {
+  prospect
+  active
+  archived
+}
+
+enum Language {
+  ar
+  fr
+}
+
+enum LeadStatus {
+  new
+  contacted
+  qualified
+  proposal
+  won
+  lost
+}
+
+enum LeadSource {
+  referral
+  phone
+  whatsapp
+  facebook
+  ouedkniss
+  walk_in
+  website
+  other
+}
+
+enum FollowUpStatus {
+  open
+  done
+  cancelled
+}
+
+enum CommunicationChannel {
+  call
+  whatsapp
+  sms
+  email
+  visit
+  other
+}
+
+enum CommunicationDirection {
+  inbound
+  outbound
+}
+
+enum RequirementsStatus {
+  draft
+  complete
+}
+
+model Customer {
+  id                String         @id @default(uuid(7))
+  type              CustomerType
+  /// Display name: the person, or the trade name of a business.
+  name              String         @db.VarChar(200)
+  /// Registered/legal name of a business (optional).
+  legalName         String?        @db.VarChar(200)
+  /// Algerian tax identification number (NIF) for businesses (optional).
+  taxId             String?        @db.VarChar(40)
+  phone             String?        @db.VarChar(30)
+  email             String?        @db.VarChar(254)
+  /// Algerian wilaya code 1..58 (19 = Sétif). Range enforced by a CHECK constraint.
+  wilayaCode        Int?
+  address           String?        @db.VarChar(300)
+  preferredLanguage Language       @default(ar)
+  status            CustomerStatus @default(prospect)
+  notes             String?        @db.VarChar(2000)
+  archivedAt        DateTime?      @db.Timestamptz(3)
+  createdById       String?
+  createdAt         DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime       @default(now()) @updatedAt @db.Timestamptz(3)
+
+  contacts       Contact[]
+  leads          Lead[]
+  followUps      FollowUp[]
+  communications Communication[]
+
+  @@index([name])
+  @@index([phone])
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+  @@map("customer")
+}
+
+model Contact {
+  id         String   @id @default(uuid(7))
+  customerId String
+  name       String   @db.VarChar(200)
+  jobTitle   String?  @db.VarChar(120)
+  phone      String?  @db.VarChar(30)
+  email      String?  @db.VarChar(254)
+  /// At most one primary contact per customer (partial unique index in the migration).
+  isPrimary  Boolean  @default(false)
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@map("contact")
+}
+
+model Lead {
+  id           String     @id @default(uuid(7))
+  customerId   String
+  title        String     @db.VarChar(200)
+  source       LeadSource @default(other)
+  status       LeadStatus @default(new)
+  /// Customer budget range in DZD (money is always numeric, never float).
+  budgetMinDzd Decimal?   @db.Decimal(14, 2)
+  budgetMaxDzd Decimal?   @db.Decimal(14, 2)
+  ownerId      String?
+  notes        String?    @db.VarChar(2000)
+  /// Required when status is lost (CHECK constraint).
+  lostReason   String?    @db.VarChar(300)
+  closedAt     DateTime?  @db.Timestamptz(3)
+  createdById  String?
+  createdAt    DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime   @default(now()) @updatedAt @db.Timestamptz(3)
+
+  customer       Customer              @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  owner          User?                 @relation("LeadOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  followUps      FollowUp[]
+  communications Communication[]
+  requirements   RequirementsResponse?
+
+  @@index([customerId])
+  @@index([status])
+  @@index([ownerId])
+  @@index([createdAt(sort: Desc)])
+  @@map("lead")
+}
+
+model FollowUp {
+  id            String         @id @default(uuid(7))
+  customerId    String
+  leadId        String?
+  title         String         @db.VarChar(200)
+  dueAt         DateTime       @db.Timestamptz(3)
+  status        FollowUpStatus @default(open)
+  assignedToId  String?
+  notes         String?        @db.VarChar(1000)
+  completedAt   DateTime?      @db.Timestamptz(3)
+  completedById String?
+  createdById   String?
+  createdAt     DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime       @default(now()) @updatedAt @db.Timestamptz(3)
+
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  lead       Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  assignedTo User?    @relation("FollowUpAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  @@index([status, dueAt])
+  @@index([assignedToId, status])
+  @@index([customerId])
+  @@index([leadId])
+  @@map("follow_up")
+}
+
+/// Append-only conversation log. There is deliberately no update/delete path in the application.
+model Communication {
+  id          String                 @id @default(uuid(7))
+  customerId  String
+  leadId      String?
+  channel     CommunicationChannel
+  direction   CommunicationDirection
+  occurredAt  DateTime               @db.Timestamptz(3)
+  summary     String                 @db.VarChar(2000)
+  createdById String?
+  createdAt   DateTime               @default(now()) @db.Timestamptz(3)
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  lead     Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  @@index([customerId, occurredAt(sort: Desc)])
+  @@index([leadId])
+  @@map("communication")
+}
+
+/// Answers to the requirements questionnaire for one lead. `version` pins the questionnaire
+/// definition the answers were given against, so old answers always render correctly.
+model RequirementsResponse {
+  id          String             @id @default(uuid(7))
+  leadId      String             @unique
+  version     Int
+  answers     Json
+  status      RequirementsStatus @default(draft)
+  updatedById String?
+  createdAt   DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime           @default(now()) @updatedAt @db.Timestamptz(3)
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@map("requirements_response")
 }
