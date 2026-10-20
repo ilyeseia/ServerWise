@@ -44,14 +44,14 @@ services:
       migrate: { condition: service_completed_successfully }
     ports:
       - "127.0.0.1:${APP_PORT:-3000}:3000"
-    networks: [internal]
-    # Tailscale exposure via tsdproxy. `funnel: "true"` makes the app reachable from the
-    # PUBLIC internet; set it to "false" for tailnet-only access (see docs/SECURITY_MODEL.md §8).
+    # `proxy` is the Docker network tsdproxy runs on (set TSDPROXY_NETWORK in .env).
+    networks: [internal, proxy]
+    # Tailscale exposure via tsdproxy v2 labels. `tailscale_funnel` makes the app reachable from
+    # the PUBLIC internet; remove it for tailnet-only access (see docs/SECURITY_MODEL.md §8).
     labels:
       tsdproxy.enable: "true"
       tsdproxy.name: "ServerWise"
-      tsdproxy.container_port: "3000"
-      tsdproxy.funnel: "true"
+      tsdproxy.port.1: "443/https:3000/http, tailscale_funnel"
     read_only: true
     tmpfs: [/tmp, /app/.next/cache]
     cap_drop: [ALL]
@@ -59,6 +59,11 @@ services:
 
 networks:
   internal:
+  # Pre-existing network shared with the tsdproxy container (find it with:
+  # docker inspect tsdproxy --format '{{json .NetworkSettings.Networks}}').
+  proxy:
+    external: true
+    name: ${TSDPROXY_NETWORK:-tsdproxy_default}
 
 volumes:
   pgdata:
