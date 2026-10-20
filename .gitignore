@@ -1,0 +1,29 @@
+# dependencies / build
+node_modules/
+.next/
+out/
+dist/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+# secrets and local config
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# data
+*.dump
+*.sql.gz
+backups/
+pgdata/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
