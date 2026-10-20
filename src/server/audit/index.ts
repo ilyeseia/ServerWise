@@ -49,6 +49,12 @@ export const AUDIT_ACTIONS = [
   "offer.verified",
   "offer.rejected",
   "recommendation.created",
+  "quote.created",
+  "quote.revision_created",
+  "quote.updated",
+  "quote.issued",
+  "quote.accepted",
+  "quote.rejected",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

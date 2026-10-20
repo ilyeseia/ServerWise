@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getAppFormatter } from "@/i18n/format";
 import { LeadStatusBadge } from "@/components/crm/badges";
+import { QuoteStatusBadge } from "@/components/quotes/status-badge";
 import { CommunicationsPanel } from "@/components/crm/communications-panel";
 import { FollowUpsPanel } from "@/components/crm/followups-panel";
 import { Alert } from "@/components/ui/alert";
@@ -14,11 +15,13 @@ import { allowedNextStatuses, isClosed } from "@/modules/crm/lead-status";
 import { getLead, listAssignableUsers } from "@/modules/crm/leads";
 import { getRecommendation, listRecommendations } from "@/modules/advisor/service";
 import { getRequirements } from "@/modules/questionnaire/service";
+import { listQuotes } from "@/modules/quotes/service";
 import { actionContext } from "@/server/actions";
 import { orNotFound, requirePagePermission } from "@/server/auth/page-guard";
 import { can } from "@/server/authz/permissions";
 import { AdvisorResults } from "../advisor-results";
 import { AdvisorRunner } from "../advisor-runner";
+import { CreateQuote } from "../create-quote";
 import { RequirementsForm } from "../requirements-form";
 import { LeadStatusControl } from "../status-control";
 
@@ -57,6 +60,10 @@ export default async function LeadPage({ params, searchParams }: Props) {
   const { rec } = await searchParams;
   const selectedId = runs.find((r) => r.id === rec)?.id ?? runs[0]?.id;
   const selected = selectedId ? await getRecommendation(ctx, selectedId) : null;
+
+  const quotesVisible = can(session.actor.role, "quote:read");
+  const leadQuotes = quotesVisible ? await listQuotes(ctx, { leadId: id, pageSize: 50 }) : null;
+  const tq = await getTranslations("Quotes");
 
   const closed = isClosed(lead.status);
   const customerArchived = lead.customer.status === "archived";
@@ -125,8 +132,9 @@ export default async function LeadPage({ params, searchParams }: Props) {
         </CardHeader>
         <CardContent>
           <RequirementsForm
-            // Remount when the saved state changes so the form reflects the server's answer.
-            key={`${requirements.updatedAt?.toISOString() ?? "new"}-${lead.status}`}
+            // Remount only when the lead's status changes. Remounting on every save would wipe
+            // the "saved" message the moment the refreshed page arrives.
+            key={lead.status}
             leadId={id}
             definition={requirements.definition}
             initialAnswers={requirements.answers}
@@ -180,6 +188,36 @@ export default async function LeadPage({ params, searchParams }: Props) {
             ) : (
               <p className="text-sm text-muted-foreground">{tAdvisor("noRuns")}</p>
             )}
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {leadQuotes ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{tq("title")}</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            {leadQuotes.items.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{tq("emptyForLead")}</p>
+            ) : (
+              <ul className="flex flex-col gap-2 text-sm">
+                {leadQuotes.items.map((q) => (
+                  <li key={q.id} className="flex flex-wrap items-center gap-3">
+                    <Link
+                      href={`/quotes/${q.id}`}
+                      className="font-medium text-primary hover:underline"
+                    >
+                      <span dir="ltr">{q.number}</span> — {q.title}
+                    </Link>
+                    <QuoteStatusBadge status={q.status} />
+                  </li>
+                ))}
+              </ul>
+            )}
+            {can(session.actor.role, "quote:write") && !closed ? (
+              <CreateQuote leadId={id} defaultTitle={lead.title} />
+            ) : null}
           </CardContent>
         </Card>
       ) : null}

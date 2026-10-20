@@ -289,6 +289,7 @@ model Lead {
   communications  Communication[]
   requirements    RequirementsResponse?
   recommendations Recommendation[]
+  quotes          Quote[]
 
   @@index([customerId])
   @@index([status])
@@ -449,7 +450,8 @@ model Product {
   createdAt   DateTime @default(now()) @db.Timestamptz(3)
   updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(3)
 
-  offers SupplierOffer[]
+  offers     SupplierOffer[]
+  quoteLines QuoteLine[]
 
   @@index([category])
   @@index([brand, model])
@@ -497,8 +499,9 @@ model SupplierOffer {
   createdById        String?
   createdAt          DateTime           @default(now()) @db.Timestamptz(3)
 
-  product  Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
-  supplier Supplier @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Restrict)
+  supplier   Supplier    @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  quoteLines QuoteLine[]
 
   @@index([productId, checkedAt(sort: Desc)])
   @@index([supplierId])
@@ -522,4 +525,105 @@ model Recommendation {
 
   @@index([leadId, createdAt(sort: Desc)])
   @@map("recommendation")
+}
+
+enum QuoteRevisionStatus {
+  draft
+  issued
+  accepted
+  rejected
+  superseded
+}
+
+enum QuoteLineKind {
+  hardware
+  labor
+  service
+  other
+}
+
+/// A quotation for a lead. The content lives in revisions; an issued revision is an immutable
+/// snapshot (see the quote_* triggers), a change is a new revision.
+model Quote {
+  id          String   @id @default(uuid(7))
+  /// Human-facing, unique, gap-tolerant number such as Q-2026-0001.
+  number      String   @unique @db.VarChar(20)
+  leadId      String
+  title       String   @db.VarChar(200)
+  createdById String?
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+
+  lead      Lead            @relation(fields: [leadId], references: [id], onDelete: Restrict)
+  revisions QuoteRevision[]
+
+  @@index([leadId])
+  @@index([createdAt(sort: Desc)])
+  @@map("quote")
+}
+
+/// Per-year counter used to allocate quote numbers atomically.
+model QuoteCounter {
+  year Int @id
+  last Int
+
+  @@map("quote_counter")
+}
+
+model QuoteRevision {
+  id           String              @id @default(uuid(7))
+  quoteId      String
+  number       Int
+  status       QuoteRevisionStatus @default(draft)
+  /// Terms / notes shown to the customer.
+  notes        String?             @db.VarChar(2000)
+  /// Set when issued: issuedAt + the configured validity.
+  validUntil   DateTime?           @db.Timestamptz(3)
+  issuedAt     DateTime?           @db.Timestamptz(3)
+  issuedById   String?
+  /// Totals are produced by the deterministic calculator (src/modules/quotes/calc.ts).
+  subtotalDzd  Decimal             @default(0) @db.Decimal(14, 2)
+  discountDzd  Decimal             @default(0) @db.Decimal(14, 2)
+  taxDzd       Decimal             @default(0) @db.Decimal(14, 2)
+  totalDzd     Decimal             @default(0) @db.Decimal(14, 2)
+  /// Frozen at issue: company, customer, lines with price evidence, calculation, engine version.
+  snapshot     Json?
+  decidedAt    DateTime?           @db.Timestamptz(3)
+  decidedById  String?
+  decisionNote String?             @db.VarChar(500)
+  createdById  String?
+  createdAt    DateTime            @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime            @default(now()) @updatedAt @db.Timestamptz(3)
+
+  quote Quote       @relation(fields: [quoteId], references: [id], onDelete: Restrict)
+  lines QuoteLine[]
+
+  @@unique([quoteId, number])
+  @@index([status])
+  @@map("quote_revision")
+}
+
+model QuoteLine {
+  id          String        @id @default(uuid(7))
+  revisionId  String
+  position    Int
+  kind        QuoteLineKind
+  description String        @db.VarChar(300)
+  quantity    Decimal       @db.Decimal(12, 3)
+  unitPrice   Decimal       @db.Decimal(14, 2)
+  discountPct Decimal       @default(0) @db.Decimal(5, 2)
+  taxRatePct  Decimal       @default(0) @db.Decimal(5, 2)
+  /// What the line costs the business per unit; unknown (null) is never guessed.
+  unitCost    Decimal?      @db.Decimal(14, 2)
+  productId   String?
+  /// The price observation the cost came from (evidence), for hardware lines.
+  offerId     String?
+
+  revision QuoteRevision  @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+  product  Product?       @relation(fields: [productId], references: [id], onDelete: Restrict)
+  offer    SupplierOffer? @relation(fields: [offerId], references: [id], onDelete: Restrict)
+
+  @@unique([revisionId, position])
+  @@index([productId])
+  @@index([offerId])
+  @@map("quote_line")
 }

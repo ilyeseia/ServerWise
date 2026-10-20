@@ -39,7 +39,8 @@
     "leads": "Opportunités",
     "followUps": "Relances",
     "catalog": "Catalogue",
-    "suppliers": "Fournisseurs"
+    "suppliers": "Fournisseurs",
+    "quotes": "Devis"
   },
   "Roles": {
     "owner": "Propriétaire",
@@ -218,7 +219,13 @@
       "offer_recorded": "Prix enregistré",
       "offer_verified": "Prix vérifié",
       "offer_rejected": "Prix rejeté",
-      "recommendation_created": "Recommandation matérielle créée"
+      "recommendation_created": "Recommandation matérielle créée",
+      "quote_created": "Création d'un devis",
+      "quote_revision_created": "Nouvelle révision d'un devis",
+      "quote_updated": "Modification du brouillon d'un devis",
+      "quote_issued": "Émission d'un devis",
+      "quote_accepted": "Devis accepté",
+      "quote_rejected": "Devis refusé"
     }
   },
   "Settings": {
@@ -456,7 +463,17 @@
       "SUPPLIER_EXISTS": "Un fournisseur porte déjà ce nom.",
       "ALREADY_DECIDED": "Ce prix a déjà fait l'objet d'une décision, définitive. Enregistrez une nouvelle observation.",
       "INVALID_DECISION": "Décision inconnue.",
-      "REQUIREMENTS_MISSING": "Enregistrez d'abord les besoins du client."
+      "REQUIREMENTS_MISSING": "Enregistrez d'abord les besoins du client.",
+      "REVISION_NOT_DRAFT": "Cette révision ne peut plus être modifiée : ce n'est pas un brouillon.",
+      "NO_LINES": "Un devis doit contenir au moins une ligne.",
+      "STALE_PRICE": "Un prix fournisseur n'est plus vérifié et récent. Mettez le prix à jour puis réessayez.",
+      "MARGIN_TOO_LOW": "La marge est inférieure au minimum configuré. L'émission nécessite le propriétaire.",
+      "TAX_RATE_NOT_ALLOWED": "Ce taux de taxe n'est pas configuré dans les paramètres de tarification.",
+      "OFFER_NEEDS_PRODUCT": "Une source de prix nécessite une ligne matériel liée à un produit.",
+      "DRAFT_EXISTS": "Un brouillon de révision existe déjà.",
+      "QUOTE_ACCEPTED": "Un devis accepté ne peut pas être révisé.",
+      "NOT_ISSUED": "Ce devis n'a pas encore été émis.",
+      "QUOTE_EXPIRED": "Ce devis a expiré. Créez une nouvelle révision."
     }
   },
   "Requirements": {
@@ -913,5 +930,103 @@
       "cameraCount": "nombre de caméras",
       "homeDeviceCount": "nombre d'appareils domotiques"
     }
+  },
+  "Quotes": {
+    "title": "Devis",
+    "subtitle": "Devis calculés de façon déterministe. Un devis émis est un instantané figé ; toute modification crée une nouvelle révision.",
+    "empty": "Aucun devis pour le moment. Créez-en un depuis la page de l'opportunité.",
+    "emptyForLead": "Aucun devis pour cette opportunité.",
+    "listTable": "Liste des devis",
+    "quoteTitle": "Titre du devis",
+    "create": "Créer un devis",
+    "col": {
+      "number": "Numéro",
+      "customer": "Client",
+      "status": "Statut",
+      "total": "Total",
+      "validUntil": "Valable jusqu'au",
+      "kind": "Type",
+      "description": "Description",
+      "quantity": "Quantité",
+      "unitPrice": "Prix unitaire",
+      "discount": "Remise %",
+      "tax": "Taxe",
+      "net": "Net"
+    },
+    "revisionShort": "r{n}",
+    "revisionLabel": "Révision {n}",
+    "revisions": "Révisions",
+    "validUntil": "Valable jusqu'au {date}",
+    "notIssued": "Non émis",
+    "currency": "DZD",
+    "printView": "Version imprimable",
+    "print": "Imprimer / enregistrer en PDF",
+    "back": "Retour",
+    "quotation": "Devis",
+    "issuedOn": "Date d'émission : {date}",
+    "preparedFor": "Établi pour",
+    "companyMissing": "Nom de l'entreprise non renseigné dans les paramètres",
+    "linesTable": "Lignes du devis",
+    "lines": "Lignes",
+    "noLines": "Aucune ligne pour le moment.",
+    "subtotal": "Sous-total",
+    "discount": "Remise",
+    "tax": "Taxe",
+    "total": "Total",
+    "margin": "Marge",
+    "marginUnknown": "Inconnue (le coût de certaines lignes n'est pas renseigné)",
+    "notes": "Notes et conditions",
+    "notesHint": "Affichées au client sur la version imprimable.",
+    "saveDraft": "Enregistrer le brouillon",
+    "saveAndIssue": "Enregistrer et émettre",
+    "savedDraft": "Brouillon enregistré.",
+    "fixNumbers": "Corrigez les valeurs numériques (quantité supérieure à zéro, prix et taux valides) avant d'enregistrer.",
+    "addLine": "Ajouter une ligne",
+    "addLabor": "Ajouter de la main-d'œuvre ({rate} DZD/h)",
+    "laborDefault": "Main-d'œuvre (heures)",
+    "addProduct": "Ajouter un produit du catalogue",
+    "chooseProduct": "Choisir un produit…",
+    "add": "Ajouter",
+    "noUsablePrice": "Aucun prix fournisseur vérifié et récent pour ce produit. Saisissez le prix de vente manuellement ou enregistrez d'abord le prix dans le catalogue.",
+    "costFromOffer": "Coût issu d'un prix fournisseur vérifié : {cost}",
+    "removeLine": "Supprimer la ligne",
+    "lineN": "Ligne {n}",
+    "decisionNote": "Note de décision (facultatif)",
+    "markAccepted": "Enregistrer l'acceptation",
+    "markRejected": "Enregistrer le refus",
+    "newRevision": "Nouvelle révision",
+    "draftReadOnly": "Ce brouillon est en cours de rédaction par l'équipe commerciale.",
+    "expiredNotice": "Ce devis a expiré. Vous pouvez créer une nouvelle révision.",
+    "acceptedOn": "Devis accepté le {date}",
+    "rejectedOn": "Devis refusé le {date}",
+    "status": {
+      "draft": "Brouillon",
+      "issued": "Émis",
+      "accepted": "Accepté",
+      "rejected": "Refusé",
+      "superseded": "Remplacé",
+      "expired": "Expiré"
+    },
+    "kind": {
+      "hardware": "Matériel",
+      "labor": "Main-d'œuvre",
+      "service": "Service",
+      "other": "Autre"
+    }
+  },
+  "Pricing": {
+    "title": "Paramètres de tarification",
+    "subtitle": "Définis par le propriétaire. Aucun taux par défaut : vous saisissez vous-même les taux de taxe ; une valeur vide signifie « non configuré ».",
+    "readOnly": "Seul le propriétaire peut modifier les paramètres de tarification.",
+    "saved": "Paramètres de tarification enregistrés.",
+    "validityDays": "Durée de validité d'un devis (jours)",
+    "taxRates": "Taux de taxe autorisés (%)",
+    "taxRatesHint": "Séparez les taux par une virgule, par ex. 9, 19. Le taux 0 est toujours autorisé.",
+    "defaultTaxRate": "Taux par défaut des nouvelles lignes (%)",
+    "markup": "Majoration sur le prix fournisseur (%)",
+    "markupHint": "Sert uniquement à suggérer un prix de vente. Laissez vide si non défini.",
+    "minMargin": "Marge minimale (%)",
+    "minMarginHint": "Émettre sous cette marge nécessite le propriétaire. Laissez vide pour aucune règle.",
+    "laborRate": "Taux horaire suggéré (DZD)"
   }
 }

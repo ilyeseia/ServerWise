@@ -25,8 +25,9 @@ Workflow for **every** stage: explain (Arabic) → implement → verify (lint, t
 | 1     | Published (`a1ce34d`), deployed and verified on the Docker host    |
 | 2     | Approved and published (authentication, RBAC, audit log, settings) |
 | 3     | Approved and published (CRM, requirements questionnaire)           |
-| 4     | Implemented, pending approval (catalog, suppliers, advisor)        |
-| 5–11  | Not started                                                        |
+| 4     | Approved and published (`bb87359`; catalog, suppliers, advisor)    |
+| 5     | Implemented, pending approval (quotations)                         |
+| 6–11  | Not started                                                        |
 
 ## Cross-cutting each stage
 

@@ -25,6 +25,13 @@ export const PERMISSIONS = [
   "catalog:write",
   /** Confirm or reject a recorded price. Owner only: it is the check on what staff enter. */
   "catalog:verify",
+  // Quotations (Stage 5). Pricing configuration is governed by settings:read / settings:update.
+  "quote:read",
+  "quote:write",
+  /** Freeze a draft into an issued revision the customer can receive. */
+  "quote:issue",
+  /** Record the customer's answer (accepted / rejected) on an issued revision. */
+  "quote:decide",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -37,8 +44,19 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "crm:write",
     "catalog:read",
     "catalog:write",
+    "quote:read",
+    "quote:write",
+    "quote:issue",
+    "quote:decide",
   ],
-  technician: ["dashboard:view", "settings:read", "crm:read", "catalog:read", "catalog:write"],
+  technician: [
+    "dashboard:view",
+    "settings:read",
+    "crm:read",
+    "catalog:read",
+    "catalog:write",
+    "quote:read",
+  ],
   viewer: ["dashboard:view"],
 };
 

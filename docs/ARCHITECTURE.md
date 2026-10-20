@@ -62,6 +62,14 @@ Conventions: UUIDv7/cuid ids, `createdAt/updatedAt`, soft-delete only where hist
 - Permissions `catalog:read|write|verify` (verify is owner-only); every change writes an audit row in the same transaction.
 - `getDb()` now caches the Prisma client on `globalThis` in every environment (it previously did so only outside production, which opened a new pool per call).
 
+**Implemented in Stage 5 (`src/modules/quotes`; rules in [QUOTING](QUOTING.md)):**
+
+- Tables `quote`, `quote_revision`, `quote_line`, `quote_counter`. A quote has numbered revisions; an issued revision stores a frozen `snapshot` (company, customer, lines with price evidence, calculation, `CALC_VERSION`) and its totals.
+- Arithmetic lives in the pure `calc.ts` (decimal.js, half-up at 2 decimals, per-line rounding), shared by the server and the editor preview; the server's recomputation is the stored truth. Margin is `null` unless every line has a known cost.
+- Database guarantees: CHECKs on quantities, prices, percentages and `total = subtotal + tax`; triggers make lines of a non-draft revision and an issued revision's content immutable, restrict status changes to `draft → issued → accepted | rejected | superseded`, and make decisions final; partial unique indexes allow one draft and one accepted revision per quote.
+- Pricing configuration (`AppSetting` key `pricing`, owner only) holds the validity, the allowed tax rates, markup, minimum margin and labour rate; nothing has a built-in value.
+- Permissions `quote:read|write|issue|decide`; the customer-facing print page never shows costs or sources.
+
 ## 5. Key flows
 
 - **Enquiry → quote:** Lead → questionnaire → advisor ranks products using fresh verified offers → quote draft → review → issue (snapshot) → accept → project.

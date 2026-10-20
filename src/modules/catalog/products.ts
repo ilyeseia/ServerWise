@@ -61,21 +61,31 @@ type OfferRow = {
  * The price to show for a product: for each supplier the newest observation that is usable
  * (strict rules: verified and fresh), then the cheapest of those.
  */
-export function pickBestPrice(
-  offers: OfferRow[],
+export function pickBestOffer<T extends OfferRow>(
+  offers: T[],
   now = new Date(),
   policy: FreshnessPolicy = DEFAULT_FRESHNESS,
-): PriceSummary | null {
-  const newestPerSupplier = new Map<string, OfferRow>();
+): T | null {
+  const newestPerSupplier = new Map<string, T>();
   for (const o of offers) {
     if (!isUsable(offerState(o, now, policy), STRICT_USAGE)) continue;
     const current = newestPerSupplier.get(o.supplierId);
     if (!current || o.checkedAt > current.checkedAt) newestPerSupplier.set(o.supplierId, o);
   }
-  const best = [...newestPerSupplier.values()].sort(
-    (a, b) =>
-      Number(a.priceDzd) - Number(b.priceDzd) || b.checkedAt.getTime() - a.checkedAt.getTime(),
-  )[0];
+  return (
+    [...newestPerSupplier.values()].sort(
+      (a, b) =>
+        Number(a.priceDzd) - Number(b.priceDzd) || b.checkedAt.getTime() - a.checkedAt.getTime(),
+    )[0] ?? null
+  );
+}
+
+export function pickBestPrice(
+  offers: OfferRow[],
+  now = new Date(),
+  policy: FreshnessPolicy = DEFAULT_FRESHNESS,
+): PriceSummary | null {
+  const best = pickBestOffer(offers, now, policy);
   return best
     ? {
         priceDzd: Number(best.priceDzd.toString()),

@@ -18,6 +18,7 @@ type NavKey =
   | "followUps"
   | "catalog"
   | "suppliers"
+  | "quotes"
   | "users"
   | "audit"
   | "settings";
@@ -30,6 +31,7 @@ const NAV: {
     | "/follow-ups"
     | "/catalog"
     | "/suppliers"
+    | "/quotes"
     | "/users"
     | "/audit"
     | "/settings";
@@ -42,6 +44,7 @@ const NAV: {
   { href: "/follow-ups", key: "followUps", permission: "crm:read" },
   { href: "/catalog", key: "catalog", permission: "catalog:read" },
   { href: "/suppliers", key: "suppliers", permission: "catalog:read" },
+  { href: "/quotes", key: "quotes", permission: "quote:read" },
   { href: "/users", key: "users", permission: "user:read" },
   { href: "/audit", key: "audit", permission: "audit:read" },
   { href: "/settings", key: "settings", permission: "settings:read" },
@@ -60,7 +63,7 @@ export function SiteHeader({ user, gated = false }: { user: HeaderUser | null; g
   const items = user && !gated ? NAV.filter((i) => can(user.role, i.permission)) : [];
 
   return (
-    <header className="border-b border-border bg-card">
+    <header className="border-b border-border bg-card print:hidden">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
         <div className="flex flex-wrap items-center gap-6">
           <Link

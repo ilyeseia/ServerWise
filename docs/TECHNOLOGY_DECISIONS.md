@@ -88,6 +88,8 @@
 
 **Stage 4 notes:** no new dependencies. The advisor is a transparent weighted heuristic, not a measured model: its sizing rules are documented engineering assumptions (see [ADVISOR_SCORING](ADVISOR_SCORING.md)), shown to users, versioned by `ENGINE_VERSION`, and meant to be tuned by the business. CPU performance uses the public PassMark CPU Mark figure copied in with its source. Price freshness windows (14 / 60 days) are constants in `freshness.ts`. Defect fixed: `getDb()` cached the Prisma client only outside production, so production opened a new pool per call (PostgreSQL `TooManyConnections` under load); it now caches on `globalThis` everywhere, with a regression test.
 
+**Stage 5 notes:** adds `decimal.js` 10.6.0 (MIT) for exact money arithmetic; the calculator is pure and shared by server and editor preview. **Quotation documents:** printed from an HTML page built from the issued snapshot using the browser's _Save as PDF_, because the browser performs correct Arabic shaping and RTL. Rejected for now: drawing PDFs with a JavaScript library (Arabic joining/RTL unreliable and unverified here) and server-side headless Chromium (adds a browser to the production image). **Open decision for the owner:** if automatic PDF files (for e-mail or archive) are required, approve adding headless Chromium to the image, or choose a hosted renderer.
+
 ### 2.6 Authorization — own RBAC matrix
 
 - Roles → permissions mapped in code, enforced in the **server** data-access layer; UI hiding is cosmetic only. CASL (`@casl/ability` 7.0.2) is evaluated in Stage 2; adopted only if attribute-level rules (e.g. "technician sees only assigned projects") get complex.

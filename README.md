@@ -3,7 +3,7 @@
 **Smarter Servers. Better Decisions.**
 AI-Powered Server & Infrastructure Management — a platform for running a server installation, infrastructure deployment and IT maintenance business in Algeria (Sétif and surrounding regions).
 
-> **Status: Stage 4 — hardware catalog, suppliers and advisor.** A product catalog with specs, suppliers, evidence-backed price observations (with verification and freshness) and an explainable, deterministic hardware advisor sit on top of Stage 3's CRM and Stage 2's authentication, roles and audit log. Quotes and the other modules arrive in later stages. See the roadmap below and [ADVISOR_SCORING](docs/ADVISOR_SCORING.md).
+> **Status: Stage 5 — quotations (SmartQuote).** Deterministic quotations with immutable issued snapshots, revisions, owner-configured pricing and a print-ready ar/fr document sit on top of Stage 4's catalog and advisor, Stage 3's CRM and Stage 2's authentication, roles and audit log. Projects and the other modules arrive in later stages. See the roadmap below, [QUOTING](docs/QUOTING.md) and [ADVISOR_SCORING](docs/ADVISOR_SCORING.md).
 
 ## الملخص بالعربية
 

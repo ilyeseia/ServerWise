@@ -16,6 +16,8 @@ import {
   type E2ERole,
 } from "./env";
 
+const E2E_PRICING_MARKER = "12.34";
+
 async function main() {
   // Must match the web server's environment so cookies signed here are accepted there.
   process.env.AUTH_SECRET = E2E_AUTH_SECRET;
@@ -101,6 +103,19 @@ async function main() {
       await tx.recommendation.deleteMany({ where: { lead: { customerId: { in: ids } } } });
       await tx.$executeRawUnsafe(
         `ALTER TABLE "recommendation" ENABLE TRIGGER recommendation_no_update_delete`,
+      );
+      // Issued quotations are immutable snapshots; the guards are lifted for this transaction only.
+      await tx.$executeRawUnsafe(`ALTER TABLE "quote_line" DISABLE TRIGGER quote_line_guard`);
+      await tx.$executeRawUnsafe(
+        `ALTER TABLE "quote_revision" DISABLE TRIGGER quote_revision_guard`,
+      );
+      const quoteWhere = { lead: { customerId: { in: ids } } };
+      await tx.quoteLine.deleteMany({ where: { revision: { quote: quoteWhere } } });
+      await tx.quoteRevision.deleteMany({ where: { quote: quoteWhere } });
+      await tx.quote.deleteMany({ where: quoteWhere });
+      await tx.$executeRawUnsafe(`ALTER TABLE "quote_line" ENABLE TRIGGER quote_line_guard`);
+      await tx.$executeRawUnsafe(
+        `ALTER TABLE "quote_revision" ENABLE TRIGGER quote_revision_guard`,
       );
       await tx.followUp.deleteMany({ where: { customerId: { in: ids } } });
       await tx.lead.deleteMany({ where: { customerId: { in: ids } } });
@@ -326,6 +341,24 @@ async function main() {
         lead.id,
       );
 
+      // Pricing configuration for the quotation flows - only when the business has not set its
+      // own. The markup below is a marker: teardown removes the setting only if it still has it.
+      if (!(await db.appSetting.findUnique({ where: { key: "pricing" } }))) {
+        await db.appSetting.create({
+          data: {
+            key: "pricing",
+            value: {
+              validityDays: 15,
+              taxRatesPct: ["9", "19"],
+              defaultTaxRatePct: "19",
+              markupPct: E2E_PRICING_MARKER,
+              minMarginPct: null,
+              laborRateDzdPerHour: "2500.00",
+            },
+          },
+        });
+      }
+
       process.stdout.write(`E2E_USERS=${JSON.stringify(users)}\n`);
       process.stdout.write(
         `E2E_FIXTURE=${JSON.stringify({
@@ -342,6 +375,10 @@ async function main() {
       );
     } else if (command === "teardown") {
       await deleteCrmData();
+      const pricing = await getDb().appSetting.findUnique({ where: { key: "pricing" } });
+      if ((pricing?.value as { markupPct?: string } | null)?.markupPct === E2E_PRICING_MARKER) {
+        await getDb().appSetting.delete({ where: { key: "pricing" } });
+      }
       await getDb().user.deleteMany({ where: { email: { endsWith: `@${E2E_EMAIL_DOMAIN}` } } });
     } else {
       throw new Error("usage: seed.ts setup|teardown");

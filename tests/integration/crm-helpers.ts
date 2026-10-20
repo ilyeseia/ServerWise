@@ -51,6 +51,17 @@ export async function deleteCustomers(ids: string[]): Promise<void> {
     await tx.$executeRawUnsafe(
       `ALTER TABLE "recommendation" ENABLE TRIGGER recommendation_no_update_delete`,
     );
+    // Issued quotations are immutable snapshots; the guards are lifted for this transaction only.
+    for (const trigger of ["quote_line_guard", "quote_revision_guard"]) {
+      const table = trigger === "quote_line_guard" ? "quote_line" : "quote_revision";
+      await tx.$executeRawUnsafe(`ALTER TABLE "${table}" DISABLE TRIGGER ${trigger}`);
+    }
+    const quoteWhere = { lead: { customerId: { in: ids } } };
+    await tx.quoteLine.deleteMany({ where: { revision: { quote: quoteWhere } } });
+    await tx.quoteRevision.deleteMany({ where: { quote: quoteWhere } });
+    await tx.quote.deleteMany({ where: quoteWhere });
+    await tx.$executeRawUnsafe(`ALTER TABLE "quote_line" ENABLE TRIGGER quote_line_guard`);
+    await tx.$executeRawUnsafe(`ALTER TABLE "quote_revision" ENABLE TRIGGER quote_revision_guard`);
     await tx.followUp.deleteMany({ where: { customerId: { in: ids } } });
     await tx.lead.deleteMany({ where: { customerId: { in: ids } } });
     await tx.customer.deleteMany({ where: { id: { in: ids } } });
