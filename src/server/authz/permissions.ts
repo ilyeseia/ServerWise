@@ -20,13 +20,25 @@ export const PERMISSIONS = [
   "crm:read",
   "crm:write",
   "crm:archive",
+  // Hardware catalog, suppliers and price observations (Stage 4).
+  "catalog:read",
+  "catalog:write",
+  /** Confirm or reject a recorded price. Owner only: it is the check on what staff enter. */
+  "catalog:verify",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
 export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   owner: PERMISSIONS,
-  sales: ["dashboard:view", "settings:read", "crm:read", "crm:write"],
-  technician: ["dashboard:view", "settings:read", "crm:read"],
+  sales: [
+    "dashboard:view",
+    "settings:read",
+    "crm:read",
+    "crm:write",
+    "catalog:read",
+    "catalog:write",
+  ],
+  technician: ["dashboard:view", "settings:read", "crm:read", "catalog:read", "catalog:write"],
   viewer: ["dashboard:view"],
 };
 

@@ -29,6 +29,13 @@ export interface E2EFixture {
   customerName: string;
   leadId: string;
   leadTitle: string;
+  /** A second open lead with complete requirements, for tests that run the advisor. */
+  advisorLeadId: string;
+  /** "Alpha" (strong, verified fresh price + a newer unverified one), "Beta" (weak), "Gamma" (no price). */
+  productAId: string;
+  productBId: string;
+  productCId: string;
+  supplierId: string;
 }
 
 /** Where the seed writes each role's signed-in browser state. */

@@ -53,6 +53,15 @@ Conventions: UUIDv7/cuid ids, `createdAt/updatedAt`, soft-delete only where hist
 - Every service follows `assertCan` → zod parse → Prisma transaction that also writes the audit row. Server actions return a result with an error _code_; the UI translates codes (`Crm.errors.*`).
 - Numbers and dates are formatted with the Algerian regional locales (`ar-DZ`, `fr-DZ`) so Arabic text uses Western digits (0-9).
 
+**Implemented in Stage 4 (`src/modules/catalog`, `src/modules/advisor`; scoring rules in [ADVISOR_SCORING](ADVISOR_SCORING.md)):**
+
+- Tables `product`, `supplier`, `supplier_offer`, `recommendation`. A spec that nobody entered is `NULL` (unknown), never a guess.
+- A price is an **observation** (`supplier_offer`): it needs evidence (a source URL or a quotation reference — database CHECK), starts `unverified`, and is **immutable** (trigger): only the owner's verification fields and notes can change, the decision is final, deletes are blocked. A price change is a new observation.
+- Offer state (`fresh` ≤ 14 days, `stale` ≤ 60, `expired`, `unverified`, `rejected`) is computed in `freshness.ts`; expired and rejected prices are never used, stale/unverified only when explicitly allowed.
+- The advisor is pure and deterministic (`needs.ts` → `scoring.ts`, `ENGINE_VERSION` 1): unknown factors are excluded from the score and lower confidence; hard exclusions are listed with reasons. Each run is saved as an **immutable** `recommendation` snapshot (trigger) so a later quote can cite exactly what was shown.
+- Permissions `catalog:read|write|verify` (verify is owner-only); every change writes an audit row in the same transaction.
+- `getDb()` now caches the Prisma client on `globalThis` in every environment (it previously did so only outside production, which opened a new pool per call).
+
 ## 5. Key flows
 
 - **Enquiry → quote:** Lead → questionnaire → advisor ranks products using fresh verified offers → quote draft → review → issue (snapshot) → accept → project.

@@ -6,6 +6,7 @@ import { changeLeadStatus, createLead, updateLead } from "@/modules/crm/leads";
 import type { LeadInput, LeadUpdateInput } from "@/modules/crm/schemas";
 import type { Answers, ValidationCode } from "@/modules/questionnaire/types";
 import { saveRequirements } from "@/modules/questionnaire/service";
+import { runAdvisorForLead } from "@/modules/advisor/service";
 import { run, type ActionResult } from "@/server/actions";
 
 const refresh = () => revalidatePath("/", "layout");
@@ -55,4 +56,18 @@ export async function saveRequirementsAction(
   if (!result.ok) return { ok: false, code: result.code };
   if ("invalid" in result) return { ok: false, code: "VALIDATION", errors: result.invalid };
   return { ok: true, status: result.status as "draft" | "complete" };
+}
+
+export async function runAdvisorAction(
+  leadId: string,
+  options: { includeStale: boolean; includeUnverified: boolean },
+): Promise<ActionResult<{ id: string }>> {
+  return run(async (ctx) => {
+    const recommendation = await runAdvisorForLead(ctx, leadId, {
+      includeStale: options.includeStale === true,
+      includeUnverified: options.includeUnverified === true,
+    });
+    refresh();
+    return { id: recommendation.id };
+  });
 }

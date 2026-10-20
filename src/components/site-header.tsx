@@ -11,10 +11,28 @@ export interface HeaderUser {
   role: Role;
 }
 
-type NavKey = "dashboard" | "customers" | "leads" | "followUps" | "users" | "audit" | "settings";
+type NavKey =
+  | "dashboard"
+  | "customers"
+  | "leads"
+  | "followUps"
+  | "catalog"
+  | "suppliers"
+  | "users"
+  | "audit"
+  | "settings";
 
 const NAV: {
-  href: "/dashboard" | "/customers" | "/leads" | "/follow-ups" | "/users" | "/audit" | "/settings";
+  href:
+    | "/dashboard"
+    | "/customers"
+    | "/leads"
+    | "/follow-ups"
+    | "/catalog"
+    | "/suppliers"
+    | "/users"
+    | "/audit"
+    | "/settings";
   key: NavKey;
   permission: Permission;
 }[] = [
@@ -22,6 +40,8 @@ const NAV: {
   { href: "/customers", key: "customers", permission: "crm:read" },
   { href: "/leads", key: "leads", permission: "crm:read" },
   { href: "/follow-ups", key: "followUps", permission: "crm:read" },
+  { href: "/catalog", key: "catalog", permission: "catalog:read" },
+  { href: "/suppliers", key: "suppliers", permission: "catalog:read" },
   { href: "/users", key: "users", permission: "user:read" },
   { href: "/audit", key: "audit", permission: "audit:read" },
   { href: "/settings", key: "settings", permission: "settings:read" },

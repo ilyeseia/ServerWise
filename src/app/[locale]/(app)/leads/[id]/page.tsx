@@ -12,18 +12,24 @@ import { listCommunications } from "@/modules/crm/communications";
 import { listFollowUps } from "@/modules/crm/followups";
 import { allowedNextStatuses, isClosed } from "@/modules/crm/lead-status";
 import { getLead, listAssignableUsers } from "@/modules/crm/leads";
+import { getRecommendation, listRecommendations } from "@/modules/advisor/service";
 import { getRequirements } from "@/modules/questionnaire/service";
 import { actionContext } from "@/server/actions";
 import { orNotFound, requirePagePermission } from "@/server/auth/page-guard";
 import { can } from "@/server/authz/permissions";
+import { AdvisorResults } from "../advisor-results";
+import { AdvisorRunner } from "../advisor-runner";
 import { RequirementsForm } from "../requirements-form";
 import { LeadStatusControl } from "../status-control";
 
 export const dynamic = "force-dynamic";
 
-type Props = { params: Promise<{ locale: string; id: string }> };
+type Props = {
+  params: Promise<{ locale: string; id: string }>;
+  searchParams: Promise<{ rec?: string }>;
+};
 
-export default async function LeadPage({ params }: Props) {
+export default async function LeadPage({ params, searchParams }: Props) {
   const { locale, id } = await params;
   setRequestLocale(resolveLocale(locale));
   const session = await requirePagePermission("crm:read");
@@ -42,6 +48,15 @@ export default async function LeadPage({ params }: Props) {
       listAssignableUsers(ctx),
     ]);
   const tr = await getTranslations("Requirements");
+  const tAdvisor = await getTranslations("Advisor");
+
+  // The advisor needs both CRM and catalog access (technicians read results; sales can run it).
+  const advisorVisible =
+    can(session.actor.role, "crm:read") && can(session.actor.role, "catalog:read");
+  const runs = advisorVisible ? await listRecommendations(ctx, id) : [];
+  const { rec } = await searchParams;
+  const selectedId = runs.find((r) => r.id === rec)?.id ?? runs[0]?.id;
+  const selected = selectedId ? await getRecommendation(ctx, selectedId) : null;
 
   const closed = isClosed(lead.status);
   const customerArchived = lead.customer.status === "archived";
@@ -121,6 +136,53 @@ export default async function LeadPage({ params }: Props) {
           />
         </CardContent>
       </Card>
+
+      {advisorVisible ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{tAdvisor("title")}</CardTitle>
+            <p className="text-sm text-muted-foreground">{tAdvisor("subtitle")}</p>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-6">
+            {canWrite && !closed ? (
+              requirements.saved ? (
+                <AdvisorRunner leadId={id} />
+              ) : (
+                <Alert>{tAdvisor("needRequirements")}</Alert>
+              )
+            ) : null}
+
+            {runs.length > 1 ? (
+              <nav
+                aria-label={tAdvisor("history")}
+                className="flex flex-wrap items-center gap-2 text-sm"
+              >
+                <span className="font-medium">{tAdvisor("history")}:</span>
+                {runs.map((run) => (
+                  <Link
+                    key={run.id}
+                    href={`/leads/${id}?rec=${run.id}`}
+                    aria-current={run.id === selectedId ? "true" : undefined}
+                    className={
+                      run.id === selectedId
+                        ? "font-bold text-primary"
+                        : "text-primary hover:underline"
+                    }
+                  >
+                    {dt(run.createdAt)}
+                  </Link>
+                ))}
+              </nav>
+            ) : null}
+
+            {selected ? (
+              <AdvisorResults view={selected} />
+            ) : (
+              <p className="text-sm text-muted-foreground">{tAdvisor("noRuns")}</p>
+            )}
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>

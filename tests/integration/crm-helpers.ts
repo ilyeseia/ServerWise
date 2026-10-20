@@ -43,8 +43,38 @@ export async function deleteCustomers(ids: string[]): Promise<void> {
     await tx.$executeRawUnsafe(
       `ALTER TABLE "communication" ENABLE TRIGGER communication_no_update_delete`,
     );
+    // Saved recommendations are immutable snapshots; same trick as above.
+    await tx.$executeRawUnsafe(
+      `ALTER TABLE "recommendation" DISABLE TRIGGER recommendation_no_update_delete`,
+    );
+    await tx.recommendation.deleteMany({ where: { lead: { customerId: { in: ids } } } });
+    await tx.$executeRawUnsafe(
+      `ALTER TABLE "recommendation" ENABLE TRIGGER recommendation_no_update_delete`,
+    );
     await tx.followUp.deleteMany({ where: { customerId: { in: ids } } });
     await tx.lead.deleteMany({ where: { customerId: { in: ids } } });
     await tx.customer.deleteMany({ where: { id: { in: ids } } });
+  });
+}
+
+/**
+ * Removes test products and suppliers with their price history. Observations are immutable
+ * (trigger), so the delete guard is lifted inside the transaction only.
+ */
+export async function deleteCatalog(productIds: string[], supplierIds: string[]): Promise<void> {
+  if (productIds.length === 0 && supplierIds.length === 0) return;
+  const db = getDb();
+  await db.$transaction(async (tx) => {
+    await tx.$executeRawUnsafe(
+      `ALTER TABLE "supplier_offer" DISABLE TRIGGER supplier_offer_guard_delete`,
+    );
+    await tx.supplierOffer.deleteMany({
+      where: { OR: [{ productId: { in: productIds } }, { supplierId: { in: supplierIds } }] },
+    });
+    await tx.$executeRawUnsafe(
+      `ALTER TABLE "supplier_offer" ENABLE TRIGGER supplier_offer_guard_delete`,
+    );
+    await tx.product.deleteMany({ where: { id: { in: productIds } } });
+    await tx.supplier.deleteMany({ where: { id: { in: supplierIds } } });
   });
 }

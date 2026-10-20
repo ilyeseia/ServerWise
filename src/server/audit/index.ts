@@ -37,6 +37,18 @@ export const AUDIT_ACTIONS = [
   "followup.reopened",
   "communication.logged",
   "requirements.saved",
+  "product.created",
+  "product.updated",
+  "product.deactivated",
+  "product.reactivated",
+  "supplier.created",
+  "supplier.updated",
+  "supplier.deactivated",
+  "supplier.reactivated",
+  "offer.recorded",
+  "offer.verified",
+  "offer.rejected",
+  "recommendation.created",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

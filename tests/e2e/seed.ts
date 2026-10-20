@@ -76,7 +76,16 @@ async function main() {
     const db = getDb();
     const where = { name: { startsWith: E2E_DATA_PREFIX } };
     const ids = (await db.customer.findMany({ where, select: { id: true } })).map((c) => c.id);
-    if (ids.length === 0) return;
+    const productIds = (
+      await db.product.findMany({
+        where: { brand: { startsWith: E2E_DATA_PREFIX } },
+        select: { id: true },
+      })
+    ).map((p) => p.id);
+    const supplierIds = (await db.supplier.findMany({ where, select: { id: true } })).map(
+      (s) => s.id,
+    );
+    if (ids.length === 0 && productIds.length === 0 && supplierIds.length === 0) return;
     await db.$transaction(async (tx) => {
       // The communication log is append-only; DDL is transactional, so this is undone on failure.
       await tx.$executeRawUnsafe(
@@ -86,9 +95,29 @@ async function main() {
       await tx.$executeRawUnsafe(
         `ALTER TABLE "communication" ENABLE TRIGGER communication_no_update_delete`,
       );
+      await tx.$executeRawUnsafe(
+        `ALTER TABLE "recommendation" DISABLE TRIGGER recommendation_no_update_delete`,
+      );
+      await tx.recommendation.deleteMany({ where: { lead: { customerId: { in: ids } } } });
+      await tx.$executeRawUnsafe(
+        `ALTER TABLE "recommendation" ENABLE TRIGGER recommendation_no_update_delete`,
+      );
       await tx.followUp.deleteMany({ where: { customerId: { in: ids } } });
       await tx.lead.deleteMany({ where: { customerId: { in: ids } } });
       await tx.customer.deleteMany({ where: { id: { in: ids } } });
+
+      // Price observations are immutable history; lift the delete guard for this transaction only.
+      await tx.$executeRawUnsafe(
+        `ALTER TABLE "supplier_offer" DISABLE TRIGGER supplier_offer_guard_delete`,
+      );
+      await tx.supplierOffer.deleteMany({
+        where: { OR: [{ productId: { in: productIds } }, { supplierId: { in: supplierIds } }] },
+      });
+      await tx.$executeRawUnsafe(
+        `ALTER TABLE "supplier_offer" ENABLE TRIGGER supplier_offer_guard_delete`,
+      );
+      await tx.product.deleteMany({ where: { id: { in: productIds } } });
+      await tx.supplier.deleteMany({ where: { id: { in: supplierIds } } });
     });
   }
 
@@ -154,9 +183,162 @@ async function main() {
         },
       });
 
+      // --- hardware catalog fixtures (no real prices: obviously fake, tagged and removed) -------
+      const supplier = await db.supplier.create({
+        data: { name: `${E2E_DATA_PREFIX} Supplier`, kind: "retailer", wilayaCode: 19 },
+      });
+      const now = Date.now();
+      const verifiedFields = {
+        verificationStatus: "verified" as const,
+        verifiedAt: new Date(),
+        verifiedById: users.owner!.id,
+      };
+      const strong = await db.product.create({
+        data: {
+          category: "nas",
+          brand: `${E2E_DATA_PREFIX} Alpha`,
+          model: "NAS-4",
+          cpuModel: "Test CPU",
+          cpuBenchmark: 5500,
+          ramGb: 8,
+          ramMaxGb: 32,
+          storageSlots: 4,
+          storageMaxTb: 40,
+          lanSpeedMbps: 2500,
+          noiseClass: "quiet",
+          idleWatts: 8,
+          maxWatts: 30,
+          createdById: users.owner!.id,
+        },
+      });
+      const weak = await db.product.create({
+        data: {
+          category: "mini_pc",
+          brand: `${E2E_DATA_PREFIX} Beta`,
+          model: "Mini-1",
+          cpuBenchmark: 1800,
+          ramGb: 4,
+          ramMaxGb: 12,
+          storageSlots: 2,
+          storageMaxTb: 12,
+          lanSpeedMbps: 1000,
+          noiseClass: "normal",
+          createdById: users.owner!.id,
+        },
+      });
+      const noPrice = await db.product.create({
+        data: {
+          category: "server",
+          brand: `${E2E_DATA_PREFIX} Gamma`,
+          model: "Rack-2",
+          createdById: users.owner!.id,
+        },
+      });
+      const baseOffer = {
+        supplierId: supplier.id,
+        condition: "new" as const,
+        availability: "in_stock" as const,
+        warrantyMonths: 24,
+        createdById: users.sales!.id,
+      };
+      await db.supplierOffer.createMany({
+        data: [
+          {
+            ...baseOffer,
+            productId: strong.id,
+            priceDzd: 90000,
+            sourceUrl: "https://example.test/alpha",
+            checkedAt: new Date(now - 86_400_000),
+            ...verifiedFields,
+          },
+          {
+            ...baseOffer,
+            productId: strong.id,
+            priceDzd: 85000,
+            sourceUrl: "https://example.test/alpha-new",
+            checkedAt: new Date(now - 3_600_000),
+          },
+          {
+            ...baseOffer,
+            productId: weak.id,
+            priceDzd: 60000,
+            quoteReference: "Quote E2E-1",
+            checkedAt: new Date(now - 2 * 86_400_000),
+            ...verifiedFields,
+          },
+        ],
+      });
+
+      const requirements = {
+        workloads: ["file_storage"],
+        concurrentUsers: 3,
+        storageTb: 4,
+        redundancy: "mirror",
+        lanSpeed: "1g",
+        noiseLevel: "quiet",
+        budgetMaxDzd: 150000,
+        alwaysOn: true,
+        maxPowerWatts: 40,
+        cpuPriority: "balanced",
+        needsRemoteAccess: false,
+        needsBackup: false,
+        growth2y: "none",
+      };
+      await db.requirementsResponse.create({
+        data: {
+          leadId: lead.id,
+          version: 1,
+          status: "complete",
+          answers: requirements,
+          updatedById: users.sales!.id,
+        },
+      });
+      // A second lead with the same answers, used by the test that runs the advisor from the UI.
+      const advisorLead = await db.lead.create({
+        data: {
+          customerId: customer.id,
+          title: `${E2E_DATA_PREFIX} Advisor lead`,
+          ownerId: users.sales!.id,
+          createdById: users.owner!.id,
+        },
+      });
+      await db.requirementsResponse.create({
+        data: {
+          leadId: advisorLead.id,
+          version: 1,
+          status: "complete",
+          answers: requirements,
+          updatedById: users.sales!.id,
+        },
+      });
+
+      // One saved advisor run on the fixture lead, so read-only checks have results to look at.
+      const { runAdvisorForLead } = await import("@/modules/advisor/service");
+      await runAdvisorForLead(
+        {
+          actor: {
+            id: users.sales!.id,
+            email: users.sales!.email,
+            name: "E2E sales",
+            role: "sales",
+          },
+        },
+        lead.id,
+      );
+
       process.stdout.write(`E2E_USERS=${JSON.stringify(users)}\n`);
       process.stdout.write(
-        `E2E_FIXTURE=${JSON.stringify({ customerId: customer.id, customerName, leadId: lead.id, leadTitle: lead.title })}\n`,
+        `E2E_FIXTURE=${JSON.stringify({
+          customerId: customer.id,
+          customerName,
+          leadId: lead.id,
+          leadTitle: lead.title,
+          advisorLeadId: advisorLead.id,
+          productAId: strong.id,
+          productBId: weak.id,
+          productCId: noPrice.id,
+          supplierId: supplier.id,
+        })}\n`,
       );
     } else if (command === "teardown") {
       await deleteCrmData();

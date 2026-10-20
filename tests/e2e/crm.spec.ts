@@ -358,12 +358,7 @@ test.describe("accessibility (axe) — CRM pages", () => {
       `leads/${f.leadId}/edit`,
       "follow-ups",
     ];
-    for (const index of paths({
-      customerId: "",
-      customerName: "",
-      leadId: "",
-      leadTitle: "",
-    }).keys()) {
+    for (const index of paths({} as E2EFixture).keys()) {
       test(`${locale}: page #${index} has no detectable violations`, async ({ page }) => {
         const path = paths(fixture())[index]!;
         await page.goto(`/${locale}/${path}`);

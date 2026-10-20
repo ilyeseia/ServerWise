@@ -283,11 +283,12 @@ model Lead {
   createdAt    DateTime   @default(now()) @db.Timestamptz(3)
   updatedAt    DateTime   @default(now()) @updatedAt @db.Timestamptz(3)
 
-  customer       Customer              @relation(fields: [customerId], references: [id], onDelete: Restrict)
-  owner          User?                 @relation("LeadOwner", fields: [ownerId], references: [id], onDelete: SetNull)
-  followUps      FollowUp[]
-  communications Communication[]
-  requirements   RequirementsResponse?
+  customer        Customer              @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  owner           User?                 @relation("LeadOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  followUps       FollowUp[]
+  communications  Communication[]
+  requirements    RequirementsResponse?
+  recommendations Recommendation[]
 
   @@index([customerId])
   @@index([status])
@@ -357,4 +358,168 @@ model RequirementsResponse {
   lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
   @@map("requirements_response")
+}
+
+// ---------------------------------------------------------------------------------------------
+// Hardware catalog, suppliers and the advisor (Stage 4)
+// ---------------------------------------------------------------------------------------------
+
+enum ProductCategory {
+  mini_pc
+  refurbished_desktop
+  nas
+  workstation
+  server
+}
+
+enum GpuClass {
+  none
+  integrated
+  dedicated
+}
+
+enum NoiseClass {
+  silent
+  quiet
+  normal
+  loud
+}
+
+enum SupplierKind {
+  retailer
+  marketplace_seller
+  manufacturer
+  importer
+  individual
+}
+
+enum OfferCondition {
+  new
+  refurbished
+  used
+}
+
+enum Availability {
+  in_stock
+  limited
+  on_order
+  out_of_stock
+  unknown
+}
+
+enum VerificationStatus {
+  unverified
+  verified
+  rejected
+}
+
+/// A hardware model. Every spec is optional: an empty spec means "unknown", never a guess.
+model Product {
+  id       String          @id @default(uuid(7))
+  category ProductCategory
+  brand    String          @db.VarChar(80)
+  model    String          @db.VarChar(120)
+
+  cpuModel           String?     @db.VarChar(120)
+  cpuCores           Int?
+  /// PassMark "CPU Mark" (multi-thread) copied from the public benchmark; see cpuBenchmarkSource.
+  cpuBenchmark       Int?
+  cpuBenchmarkSource String?     @db.VarChar(300)
+  ramGb              Int?
+  ramMaxGb           Int?
+  /// Drive slots (SATA bays and M.2) available for data.
+  storageSlots       Int?
+  /// Largest total capacity the model can hold, in TB.
+  storageMaxTb       Decimal?    @db.Decimal(8, 2)
+  lanPorts           Int?
+  /// Speed of the fastest network port in Mbit/s (1000, 2500, 10000...).
+  lanSpeedMbps       Int?
+  hasWifi            Boolean?
+  gpuClass           GpuClass?
+  noiseClass         NoiseClass?
+  idleWatts          Int?
+  maxWatts           Int?
+  ecc                Boolean?
+  /// Manufacturer documentation the specs were taken from.
+  specsSource        String?     @db.VarChar(300)
+  notes              String?     @db.VarChar(2000)
+
+  active      Boolean  @default(true)
+  createdById String?
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  offers SupplierOffer[]
+
+  @@index([category])
+  @@index([brand, model])
+  @@map("product")
+}
+
+model Supplier {
+  id         String       @id @default(uuid(7))
+  name       String       @unique @db.VarChar(160)
+  kind       SupplierKind
+  wilayaCode Int?
+  phone      String?      @db.VarChar(30)
+  url        String?      @db.VarChar(300)
+  notes      String?      @db.VarChar(1000)
+  active     Boolean      @default(true)
+  createdAt  DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime     @default(now()) @updatedAt @db.Timestamptz(3)
+
+  offers SupplierOffer[]
+
+  @@map("supplier")
+}
+
+/// One observation of a price at a supplier. Immutable (database trigger): a price change is a
+/// NEW row, so the price history is preserved. Only verification fields and notes can change.
+model SupplierOffer {
+  id                 String             @id @default(uuid(7))
+  productId          String
+  supplierId         String
+  priceDzd           Decimal            @db.Decimal(14, 2)
+  condition          OfferCondition
+  availability       Availability       @default(unknown)
+  warrantyMonths     Int?
+  /// Wilaya where the item can be collected (1..58).
+  locationWilayaCode Int?
+  /// Evidence: a link to the listing/page, or a reference for a manual quotation. One is required.
+  sourceUrl          String?            @db.VarChar(500)
+  quoteReference     String?            @db.VarChar(160)
+  /// When the price was observed at the source.
+  checkedAt          DateTime           @db.Timestamptz(3)
+  verificationStatus VerificationStatus @default(unverified)
+  verifiedAt         DateTime?          @db.Timestamptz(3)
+  verifiedById       String?
+  notes              String?            @db.VarChar(1000)
+  createdById        String?
+  createdAt          DateTime           @default(now()) @db.Timestamptz(3)
+
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  supplier Supplier @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+
+  @@index([productId, checkedAt(sort: Desc)])
+  @@index([supplierId])
+  @@index([verificationStatus])
+  @@map("supplier_offer")
+}
+
+/// A saved advisor run: an immutable snapshot of the inputs, the weights and the full explained
+/// ranking, so a recommendation can be shown or quoted later exactly as it was produced.
+model Recommendation {
+  id                  String   @id @default(uuid(7))
+  leadId              String
+  engineVersion       Int
+  requirementsVersion Int
+  inputs              Json
+  results             Json
+  createdById         String?
+  createdAt           DateTime @default(now()) @db.Timestamptz(3)
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Restrict)
+
+  @@index([leadId, createdAt(sort: Desc)])
+  @@map("recommendation")
 }

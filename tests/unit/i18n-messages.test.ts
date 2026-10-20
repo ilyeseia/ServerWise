@@ -48,6 +48,9 @@ describe("translations", () => {
       "Requirements.o.remoteMethod.wireguard",
       "Requirements.o.storageMedia.ssd",
       "Requirements.o.storageMedia.hdd",
+      "Catalog.categories.nas",
+      "Advisor.units.cpuMark",
+      "Advisor.detail.performance",
     ]);
     for (const [key, value] of Object.entries(arKeys)) {
       if (!exempt.has(key)) expect(value, key).toMatch(arabic);
@@ -107,6 +110,12 @@ describe("requirements questionnaire labels", () => {
         "LEAD_CUSTOMER_MISMATCH",
         "FUTURE_DATE",
         "UNKNOWN_QUESTIONNAIRE_VERSION",
+        "PRODUCT_INACTIVE",
+        "SUPPLIER_INACTIVE",
+        "SUPPLIER_EXISTS",
+        "ALREADY_DECIDED",
+        "INVALID_DECISION",
+        "REQUIREMENTS_MISSING",
         "VALIDATION",
         "FORBIDDEN",
         "UNAUTHORIZED",

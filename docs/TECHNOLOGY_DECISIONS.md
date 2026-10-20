@@ -86,6 +86,8 @@
 
 **Stage 3 notes:** no new dependencies. Lead budgets use PostgreSQL `numeric(14,2)` (Prisma `Decimal`), never floats; `decimal.js` arrives with quotation arithmetic in Stage 5. The requirements questionnaire is defined in TypeScript and versioned in Git rather than stored in tables (testable, reviewable, no admin UI to secure); old responses keep their version. Numbers and dates use the regional locales `ar-DZ` / `fr-DZ` through `src/i18n/format.ts`, so Arabic text shows Western digits (0-9) as is customary in Algeria — a deliberate choice, easy to revisit in one file. Server actions return error _codes_ and the UI translates them.
 
+**Stage 4 notes:** no new dependencies. The advisor is a transparent weighted heuristic, not a measured model: its sizing rules are documented engineering assumptions (see [ADVISOR_SCORING](ADVISOR_SCORING.md)), shown to users, versioned by `ENGINE_VERSION`, and meant to be tuned by the business. CPU performance uses the public PassMark CPU Mark figure copied in with its source. Price freshness windows (14 / 60 days) are constants in `freshness.ts`. Defect fixed: `getDb()` cached the Prisma client only outside production, so production opened a new pool per call (PostgreSQL `TooManyConnections` under load); it now caches on `globalThis` everywhere, with a regression test.
+
 ### 2.6 Authorization — own RBAC matrix
 
 - Roles → permissions mapped in code, enforced in the **server** data-access layer; UI hiding is cosmetic only. CASL (`@casl/ability` 7.0.2) is evaluated in Stage 2; adopted only if attribute-level rules (e.g. "technician sees only assigned projects") get complex.

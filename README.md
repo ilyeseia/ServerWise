@@ -3,7 +3,7 @@
 **Smarter Servers. Better Decisions.**
 AI-Powered Server & Infrastructure Management — a platform for running a server installation, infrastructure deployment and IT maintenance business in Algeria (Sétif and surrounding regions).
 
-> **Status: Stage 3 — CRM and requirements questionnaire.** Customers, contacts, leads with a pipeline state machine, follow-ups/reminders, an append-only conversation log and a conditional, versioned requirements questionnaire (ar/fr) sit on top of Stage 2's authentication, roles and audit log. Hardware advisor, quotes and the other modules arrive in later stages. See the roadmap below.
+> **Status: Stage 4 — hardware catalog, suppliers and advisor.** A product catalog with specs, suppliers, evidence-backed price observations (with verification and freshness) and an explainable, deterministic hardware advisor sit on top of Stage 3's CRM and Stage 2's authentication, roles and audit log. Quotes and the other modules arrive in later stages. See the roadmap below and [ADVISOR_SCORING](docs/ADVISOR_SCORING.md).
 
 ## الملخص بالعربية
 
