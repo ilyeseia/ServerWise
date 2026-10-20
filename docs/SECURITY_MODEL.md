@@ -59,6 +59,8 @@ Customer PII (names, phones, addresses), commercial data (prices, margins, contr
 
 Documentation-only in v1. Guidance: customer-owned tailnet, ACLs by tag with least privilege, no subnet routers or exit nodes without a written plan, device approval enabled, key expiry kept on, no Funnel/public exposure by default. Check Tailscale plan terms for commercial use before relying on any free tier.
 
+**Current deployment exception:** `compose.yml` labels the app for tsdproxy with `tsdproxy.funnel: "true"` (public Funnel exposure), at the owner's explicit request. Until Stage 2 ships authentication, the public page shows only a static welcome and the application/database health status. Do not add business data or modules behind that URL without authentication; switch the label to `"false"` if tailnet-only access is preferred.
+
 ## 9. Logging, audit, monitoring
 
 JSON logs with redaction (`authorization`, cookies, passwords, tokens). Audit events: login success/fail, password/role change, quote issue/approve/discount, project state changes, exports, AI sensitive-action confirmations, settings changes. Alerts (later): repeated login failures, backup failure, expired restore tests.

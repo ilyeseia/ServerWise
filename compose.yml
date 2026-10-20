@@ -45,6 +45,13 @@ services:
     ports:
       - "127.0.0.1:${APP_PORT:-3000}:3000"
     networks: [internal]
+    # Tailscale exposure via tsdproxy. `funnel: "true"` makes the app reachable from the
+    # PUBLIC internet; set it to "false" for tailnet-only access (see docs/SECURITY_MODEL.md §8).
+    labels:
+      tsdproxy.enable: "true"
+      tsdproxy.name: "ServerWise"
+      tsdproxy.container_port: "3000"
+      tsdproxy.funnel: "true"
     read_only: true
     tmpfs: [/tmp, /app/.next/cache]
     cap_drop: [ALL]
