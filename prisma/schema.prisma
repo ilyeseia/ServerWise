@@ -1,0 +1,20 @@
+// ServerWise data model. Stage 1 contains only the infrastructure table needed to
+// prove migrations work; business tables arrive with their stages.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Key/value application settings (used from Stage 2 for secure app configuration).
+model AppSetting {
+  key       String   @id @db.VarChar(100)
+  value     Json
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  @@map("app_setting")
+}

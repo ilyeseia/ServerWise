@@ -1,0 +1,43 @@
+{
+  "Metadata": {
+    "title": "ServerWise",
+    "description": "إدارة الخوادم والبنية التحتية بالذكاء الاصطناعي"
+  },
+  "Common": {
+    "appName": "ServerWise",
+    "tagline": "خوادم أذكى. قرارات أفضل.",
+    "skipToContent": "تخطَّ إلى المحتوى الرئيسي"
+  },
+  "Header": {
+    "language": "اللغة",
+    "theme": "المظهر",
+    "themeLight": "فاتح",
+    "themeDark": "داكن",
+    "themeSystem": "حسب النظام",
+    "switchToArabic": "العربية",
+    "switchToFrench": "Français"
+  },
+  "Home": {
+    "title": "مرحبًا بك في ServerWise",
+    "subtitle": "منصة لإدارة دورة عمل تركيب الخوادم وصيانة البنية التحتية، من أول استفسار إلى التجديد.",
+    "statusTitle": "حالة النظام",
+    "statusDescription": "فحص مباشر للخدمات التي يعتمد عليها التطبيق.",
+    "application": "التطبيق",
+    "database": "قاعدة البيانات",
+    "ok": "يعمل",
+    "unavailable": "غير متاح",
+    "notConfigured": "غير مُهيَّأ",
+    "foundationNote": "هذه مرحلة الأساس: لا توجد وحدات أعمال بعد. تُضاف الوحدات تباعًا وفق خارطة الطريق."
+  },
+  "Errors": {
+    "title": "حدث خطأ غير متوقع",
+    "description": "تعذَّر إكمال العملية. يمكنك المحاولة مرة أخرى.",
+    "retry": "إعادة المحاولة",
+    "notFoundTitle": "الصفحة غير موجودة",
+    "notFoundDescription": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
+    "backHome": "العودة إلى الصفحة الرئيسية"
+  },
+  "Loading": {
+    "label": "جارٍ التحميل…"
+  }
+}

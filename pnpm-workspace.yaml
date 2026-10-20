@@ -1,0 +1,20 @@
+allowBuilds:
+  "@parcel/watcher": false
+  "@prisma/engines": true
+  "@swc/core": false
+  esbuild: true
+  prisma: true
+  unrs-resolver: true
+minimumReleaseAgeExclude:
+  - lucide-react@1.60.0
+  - "@typescript-eslint/eslint-plugin@8.72.0"
+  - "@typescript-eslint/parser@8.72.0"
+  - "@typescript-eslint/project-service@8.72.0"
+  - "@typescript-eslint/scope-manager@8.72.0"
+  - "@typescript-eslint/tsconfig-utils@8.72.0"
+  - "@typescript-eslint/type-utils@8.72.0"
+  - "@typescript-eslint/types@8.72.0"
+  - "@typescript-eslint/typescript-estree@8.72.0"
+  - "@typescript-eslint/utils@8.72.0"
+  - "@typescript-eslint/visitor-keys@8.72.0"
+  - typescript-eslint@8.72.0

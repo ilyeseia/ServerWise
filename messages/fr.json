@@ -1,0 +1,43 @@
+{
+  "Metadata": {
+    "title": "ServerWise",
+    "description": "Gestion de serveurs et d'infrastructures assistée par IA"
+  },
+  "Common": {
+    "appName": "ServerWise",
+    "tagline": "Des serveurs plus intelligents. De meilleures décisions.",
+    "skipToContent": "Aller au contenu principal"
+  },
+  "Header": {
+    "language": "Langue",
+    "theme": "Thème",
+    "themeLight": "Clair",
+    "themeDark": "Sombre",
+    "themeSystem": "Système",
+    "switchToArabic": "العربية",
+    "switchToFrench": "Français"
+  },
+  "Home": {
+    "title": "Bienvenue sur ServerWise",
+    "subtitle": "Une plateforme pour piloter l'installation de serveurs et la maintenance d'infrastructures, de la première demande au renouvellement.",
+    "statusTitle": "État du système",
+    "statusDescription": "Vérification en direct des services dont dépend l'application.",
+    "application": "Application",
+    "database": "Base de données",
+    "ok": "Opérationnel",
+    "unavailable": "Indisponible",
+    "notConfigured": "Non configuré",
+    "foundationNote": "Ceci est la phase de fondation : aucun module métier pour l'instant. Les modules sont ajoutés progressivement selon la feuille de route."
+  },
+  "Errors": {
+    "title": "Une erreur inattendue s'est produite",
+    "description": "L'opération n'a pas pu aboutir. Vous pouvez réessayer.",
+    "retry": "Réessayer",
+    "notFoundTitle": "Page introuvable",
+    "notFoundDescription": "La page recherchée n'existe pas ou a été déplacée.",
+    "backHome": "Retour à l'accueil"
+  },
+  "Loading": {
+    "label": "Chargement…"
+  }
+}

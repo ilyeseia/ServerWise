@@ -1,0 +1,57 @@
+# Production-style stack: PostgreSQL + one-shot migrations + app.
+# Usage:  cp .env.example .env   (set a strong POSTGRES_PASSWORD)  then  docker compose up -d --build
+# The database is NOT published to the host; only the app is, and only on localhost
+# (put a TLS reverse proxy such as Caddy/Nginx in front for public access).
+
+name: serverwise
+
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-serverwise}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-serverwise}
+    volumes:
+      - pgdata:/var/lib/postgresql
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  migrate:
+    build: { context: ., target: migrate }
+    restart: "no"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-serverwise}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-serverwise}
+    depends_on:
+      db: { condition: service_healthy }
+    networks: [internal]
+
+  app:
+    build: { context: ., target: runner }
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-serverwise}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-serverwise}
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    ports:
+      - "127.0.0.1:${APP_PORT:-3000}:3000"
+    networks: [internal]
+    read_only: true
+    tmpfs: [/tmp, /app/.next/cache]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+
+networks:
+  internal:
+
+volumes:
+  pgdata:

@@ -27,3 +27,7 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# generated
+src/generated/
+next-env.d.ts
