@@ -17,16 +17,27 @@ Customer PII (names, phones, addresses), commercial data (prices, margins, contr
 
 ## 3. Authentication and sessions
 
-- Better Auth, email + password, DB-backed sessions; cookies `HttpOnly; Secure; SameSite=Lax`, `__Host-` prefix in production; idle + absolute timeouts; revoke-all on password change.
-- No self-registration: users are invited/created by Admin.
-- Login throttling per account and per IP; generic error messages.
-- TOTP 2FA available from Stage 2; required for Admin.
+**Implemented in Stage 2** (code: `src/server/auth/`):
+
+- Better Auth 1.7.11, email + password, DB-backed sessions. Passwords hashed with Better Auth's default scrypt; 12–128 characters. No password-breach lookup (it would send data to a third party).
+- Cookies: `HttpOnly`, `SameSite=Lax`, prefix `serverwise`, and `Secure` whenever `APP_URL` is `https://` (the `__Secure-` prefix is then added by Better Auth). Sessions last 12 h and refresh hourly. Production must be served over HTTPS.
+- **No self-registration.** `/sign-up/email`, `/admin/remove-user` and `/admin/impersonate-user` are disabled (404, covered by tests). Owners create accounts; the owner receives a random one-time temporary password (CSPRNG, 16 chars) and the account is flagged `mustChangePassword`. Until it is changed, every application page redirects to `/account`.
+- **Lockout:** 5 consecutive wrong passwords lock the account for 15 minutes. Wrong password, unknown email and locked account all return the same message and status (no account enumeration). Counters reset on a correct password.
+- **Rate limiting:** Better Auth limiter backed by PostgreSQL (survives restarts): sign-in 10/min, TOTP and backup-code verification 10/min, password change 5/min per client address.
+- **TOTP 2FA** (Better Auth `twoFactor`): QR rendered locally (the secret never goes to a third party), 10 single-use backup codes, built-in 2FA attempt lockout. Owners must enrol before using the app when `REQUIRE_OWNER_2FA` is true (default in production).
+- **CSRF:** Better Auth validates `Origin` against `APP_URL` + `AUTH_TRUSTED_ORIGINS` for cookie-bearing state-changing requests (verified against a production-mode server in e2e; Better Auth disables this check when `NODE_ENV=test`).
+- Changing a password revokes every other session and issues a new one. Deactivating a user ends their sessions immediately.
+- Telemetry from the auth library is disabled explicitly.
+- Known limitation: sessions slide; there is no hard absolute lifetime cap yet (Stage 11).
 
 ## 4. Authorization
 
-- Permission strings (`customer:read`, `quote:approve`, …) mapped to roles in one module; checked inside services (never only in UI/middleware).
-- Resource-level rules where needed (e.g. Technician → assigned projects).
-- Deny by default; a test enumerates every service function and asserts it rejects an unauthenticated and an unauthorized caller.
+- Permission strings (`user:manage`, `audit:read`, …) mapped to the roles `owner`, `sales`, `technician`, `viewer` in one module (`src/server/authz/permissions.ts`); checked inside services with `assertCan` (never only in UI/middleware). Pages render the localized 404 for sections a user may not open.
+- Resource-level rules where needed (e.g. Technician → assigned projects) arrive with their modules.
+- Deny by default: unknown roles, forged role strings and missing sessions are refused.
+- **Tested:** a hand-written golden matrix (role × permission) fails if a role is widened by accident; every user-management operation is asserted to reject anonymous callers and every non-owner role; real-session integration tests show a non-owner cannot reach Better Auth's admin API even if the service layer were bypassed.
+- Business rules: an owner cannot change/deactivate their own account, and the last active owner cannot be demoted or deactivated.
+- The admin endpoints of Better Auth are defence in depth: only the `owner` role holds admin statements.
 
 ## 5. Application security
 
@@ -59,11 +70,13 @@ Customer PII (names, phones, addresses), commercial data (prices, margins, contr
 
 Documentation-only in v1. Guidance: customer-owned tailnet, ACLs by tag with least privilege, no subnet routers or exit nodes without a written plan, device approval enabled, key expiry kept on, no Funnel/public exposure by default. Check Tailscale plan terms for commercial use before relying on any free tier.
 
-**Current deployment exception:** `compose.yml` labels the app for tsdproxy with `tsdproxy.funnel: "true"` (public Funnel exposure), at the owner's explicit request. Until Stage 2 ships authentication, the public page shows only a static welcome and the application/database health status. Do not add business data or modules behind that URL without authentication; switch the label to `"false"` if tailnet-only access is preferred.
+**Current deployment:** `compose.yml` publishes the app through tsdproxy v2 with the `tailscale_funnel` port option (public Funnel exposure), at the owner's explicit request. Since Stage 2 every application page requires sign-in; the only anonymous surface is the login form, `/api/health` (`{"status":"ok"}`), `/api/ready` (database up/down, no details) and the auth endpoints. Because the login form is reachable from the internet: keep lockout and rate limits enabled, require 2FA for owners (default in production), use a long unique `AUTH_SECRET`, and serve the public URL over HTTPS (`APP_URL=https://…`, added to `AUTH_TRUSTED_ORIGINS` if it differs). Remove `tailscale_funnel` from the label for tailnet-only access.
 
 ## 9. Logging, audit, monitoring
 
-JSON logs with redaction (`authorization`, cookies, passwords, tokens). Audit events: login success/fail, password/role change, quote issue/approve/discount, project state changes, exports, AI sensitive-action confirmations, settings changes. Alerts (later): repeated login failures, backup failure, expired restore tests.
+JSON logs (pino) with redaction of passwords, tokens, secrets, TOTP URIs, backup codes, cookies and `DATABASE_URL`/`AUTH_SECRET`.
+
+**Audit log (Stage 2):** table `audit_log`, **append-only enforced by database triggers** that reject `UPDATE`, `DELETE` and `TRUNCATE` (tested). Rows carry actor id + email snapshot, action, entity, client address, user agent and metadata; there are no foreign keys, so history survives user deletion. Recorded now: sign-in success/failure/blocked, lockout, sign-out, password changed / reset by an owner, 2FA enrolment started/enabled/disabled/failed, user created, role changed, user deactivated/reactivated, settings changed (settings and their audit row commit in one transaction). Only owners can read it (`/audit`). Writes from auth hooks never block sign-in but failures are logged at error level; settings changes fail if the audit row cannot be written. The planned events: login success/fail, password/role change, quote issue/approve/discount, project state changes, exports, AI sensitive-action confirmations, settings changes. Alerts (later): repeated login failures, backup failure, expired restore tests.
 
 ## 10. Backup and recovery (summary; full runbook in Stage 8/11)
 

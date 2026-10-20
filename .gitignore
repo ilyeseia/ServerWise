@@ -28,6 +28,9 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 
+# e2e signed-in browser state (session cookies)
+tests/e2e/.auth/
+
 # generated
 src/generated/
 next-env.d.ts

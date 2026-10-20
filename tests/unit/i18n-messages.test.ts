@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import ar from "../../messages/ar.json";
 import fr from "../../messages/fr.json";
 import { defaultLocale, isLocale, localeDirection, locales } from "@/i18n/routing";
+import { AUDIT_ACTIONS, auditMessageKey } from "@/server/audit";
 
 function flatten(obj: Record<string, unknown>, prefix = ""): Record<string, string> {
   return Object.entries(obj).reduce<Record<string, string>>((acc, [key, value]) => {
@@ -31,10 +32,33 @@ describe("translations", () => {
 
   it("contain Arabic script in the Arabic copy (no French leaked in)", () => {
     const arabic = /[؀-ۿ]/;
-    const exempt = new Set(["Metadata.title", "Common.appName", "Header.switchToFrench"]);
+    const exempt = new Set([
+      "Metadata.title",
+      "Common.appName",
+      "Common.none",
+      "Header.switchToFrench",
+    ]);
     for (const [key, value] of Object.entries(arKeys)) {
       if (!exempt.has(key)) expect(value, key).toMatch(arabic);
     }
+  });
+});
+
+describe("audit labels", () => {
+  it("every audit action has a label in both languages", () => {
+    for (const messages of [flatten(ar), flatten(fr)]) {
+      for (const action of AUDIT_ACTIONS) {
+        expect(messages[`Audit.actions.${auditMessageKey(action)}`], action).toBeTruthy();
+      }
+    }
+  });
+
+  it("message keys never contain dots (next-intl would treat them as nesting)", () => {
+    const keys = (obj: Record<string, unknown>): string[] =>
+      Object.entries(obj).flatMap(([k, v]) =>
+        v !== null && typeof v === "object" ? [k, ...keys(v as Record<string, unknown>)] : [k],
+      );
+    for (const k of [...keys(ar), ...keys(fr)]) expect(k).not.toContain(".");
   });
 });
 

@@ -26,8 +26,12 @@ services:
   migrate:
     build: { context: ., target: migrate }
     restart: "no"
+    # Also used for one-off admin commands:
+    #   docker compose run --rm migrate pnpm owner:create --email you@example.com --name "Your Name"
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-serverwise}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-serverwise}
+      AUTH_SECRET: ${AUTH_SECRET:?Set AUTH_SECRET in .env (openssl rand -base64 32)}
+      APP_URL: ${APP_URL:-http://localhost:3000}
     depends_on:
       db: { condition: service_healthy }
     networks: [internal]
@@ -37,7 +41,11 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
+      # Public URL users type in the browser. Must be https:// in production (secure cookies).
       APP_URL: ${APP_URL:-http://localhost:3000}
+      AUTH_SECRET: ${AUTH_SECRET:?Set AUTH_SECRET in .env (openssl rand -base64 32)}
+      AUTH_TRUSTED_ORIGINS: ${AUTH_TRUSTED_ORIGINS:-}
+      REQUIRE_OWNER_2FA: ${REQUIRE_OWNER_2FA:-}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       DATABASE_URL: postgresql://${POSTGRES_USER:-serverwise}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-serverwise}
     depends_on:

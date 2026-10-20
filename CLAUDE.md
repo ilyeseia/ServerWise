@@ -4,7 +4,8 @@ Project: AI-powered server & infrastructure management platform for an Algerian 
 
 ## Current state
 
-Stage 0 published. Stage 1 (foundation) implemented, pending approval/publication. Layout: `src/app/[locale]` (pages), `src/i18n`, `src/server/{config,db,logging,health}`, `prisma/`, `messages/{ar,fr}.json`, `tests/{unit,integration,e2e}`. Read `docs/` first: PRODUCT_REQUIREMENTS, ARCHITECTURE, TECHNOLOGY_DECISIONS, SECURITY_MODEL, IMPLEMENTATION_ROADMAP.
+Stages 0, 1 and 2 (authentication, RBAC, audit, settings) published. Layout: `src/app/[locale]` (`login`, `account`, and `(app)/{dashboard,users,audit,settings}` behind the access gate), `src/i18n`, `src/server/{config,db,logging,health,auth,authz,audit}`, `src/modules/{users,settings}` (services: `assertCan` first, then Prisma), `prisma/`, `scripts/create-owner.ts`, `messages/{ar,fr}.json`, `tests/{unit,integration,e2e}`.
+Auth rules: no self-registration; permissions live in `src/server/authz/permissions.ts` (extend the golden matrix in `tests/unit/authz.test.ts` with every new permission); the audit log is append-only (DB triggers); integration tests need Postgres + migrations and leave append-only audit rows tagged `@example.test`. Read `docs/` first: PRODUCT_REQUIREMENTS, ARCHITECTURE, TECHNOLOGY_DECISIONS, SECURITY_MODEL, IMPLEMENTATION_ROADMAP.
 
 ## Mandatory workflow
 

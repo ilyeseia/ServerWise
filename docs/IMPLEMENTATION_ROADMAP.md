@@ -17,6 +17,15 @@ Workflow for **every** stage: explain (Arabic) → implement → verify (lint, t
 | 10    | Analytics & reporting            | Dashboards from real data, exports                                                                                                                                                                                           | Query correctness tests against seeded fixtures                                                                  | 5–8                    |
 | 11    | Production hardening             | Security review, a11y audit, perf, backup/restore drill, release docs                                                                                                                                                        | Drill executed; audit clean; release checklist                                                                   | all                    |
 
+## Status
+
+| Stage | State                                                              |
+| ----- | ------------------------------------------------------------------ |
+| 0     | Published (`2275845`)                                              |
+| 1     | Published (`a1ce34d`), deployed and verified on the Docker host    |
+| 2     | Approved and published (authentication, RBAC, audit log, settings) |
+| 3–11  | Not started                                                        |
+
 ## Cross-cutting each stage
 
 Update docs and `CLAUDE.md`; add tests for new rules; migrations reviewed; secret scan; `pnpm audit`; Arabic + French strings for every shipped screen.

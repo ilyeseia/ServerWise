@@ -82,6 +82,8 @@
 - **Alternatives:** Auth.js/next-auth — `latest` is v4.24.15 (legacy line) and v5 is still tagged `beta`; Lucia-style hand-rolled sessions (more security surface to own); external IdP (Keycloak/Clerk) — adds a dependency not justified for v1 but kept as an upgrade path.
 - **Limitations:** 1.x API still evolving — pin exact version, wrap behind `src/server/auth` so a swap is localized. Stage 2 includes a focused security review (cookie flags, session rotation, lockout, password hashing parameters).
 
+**Stage 2 notes (implemented):** Better Auth 1.7.11 with the `admin` and `twoFactor` plugins, Prisma adapter, database-backed rate limiting, `nextCookies` last. Verified against the installed package (not just the docs): hooks receive `ctx.context.returned` (an `APIError` on failure) and `ctx.context.newSession`; `internalAdapter.createUser(user, { method })` takes a provisioning source as second argument; `telemetry` is off by default and set off explicitly; the origin/CSRF check is disabled when `NODE_ENV=test`. Changing a password replaces the session, so audit hooks must read `newSession`. `qrcode.react` 4.2.0 (ISC) renders the TOTP QR locally. Alternatives rejected for 2FA UI: third-party QR services (would leak the secret).
+
 ### 2.6 Authorization — own RBAC matrix
 
 - Roles → permissions mapped in code, enforced in the **server** data-access layer; UI hiding is cosmetic only. CASL (`@casl/ability` 7.0.2) is evaluated in Stage 2; adopted only if attribute-level rules (e.g. "technician sees only assigned projects") get complex.

@@ -5,6 +5,9 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { SiteHeader } from "@/components/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { isLocale, localeDirection, locales } from "@/i18n/routing";
+import { accessGate } from "@/server/auth/session";
+import { getCurrentSession } from "@/server/auth/current";
+import { isOwner2faRequired } from "@/server/config/env";
 import "../globals.css";
 
 type Props = {
@@ -31,6 +34,10 @@ export default async function LocaleLayout({ children, params }: Props) {
   if (!isLocale(locale)) notFound();
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "Common" });
+  const session = await getCurrentSession();
+  const gated = session
+    ? accessGate(session, { require2faForOwner: isOwner2faRequired() }) !== "ok"
+    : false;
 
   return (
     <html lang={locale} dir={localeDirection[locale]} suppressHydrationWarning>
@@ -43,7 +50,10 @@ export default async function LocaleLayout({ children, params }: Props) {
             >
               {t("skipToContent")}
             </a>
-            <SiteHeader />
+            <SiteHeader
+              user={session ? { name: session.actor.name, role: session.actor.role } : null}
+              gated={gated}
+            />
             <main id="main" className="mx-auto max-w-5xl px-4 py-10">
               {children}
             </main>

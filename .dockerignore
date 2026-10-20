@@ -9,7 +9,7 @@ test-results
 .env.*
 !.env.example
 docs
-tests
+tests/e2e/.auth
 *.md
 Dockerfile
 compose*.yml

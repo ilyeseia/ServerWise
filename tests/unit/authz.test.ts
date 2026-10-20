@@ -1,0 +1,112 @@
+import { describe, expect, it } from "vitest";
+import { assertCan, ForbiddenError, UnauthorizedError, type Actor } from "@/server/authz/guard";
+import {
+  can,
+  isRole,
+  PERMISSIONS,
+  ROLES,
+  ROLE_PERMISSIONS,
+  type Permission,
+  type Role,
+} from "@/server/authz/permissions";
+
+/**
+ * Golden table: the intended access matrix, written out by hand. If someone widens a role in
+ * permissions.ts, this test fails until the change is made deliberately here too.
+ */
+const EXPECTED: Record<Role, Record<Permission, boolean>> = {
+  owner: {
+    "dashboard:view": true,
+    "user:read": true,
+    "user:manage": true,
+    "settings:read": true,
+    "settings:update": true,
+    "audit:read": true,
+  },
+  sales: {
+    "dashboard:view": true,
+    "user:read": false,
+    "user:manage": false,
+    "settings:read": true,
+    "settings:update": false,
+    "audit:read": false,
+  },
+  technician: {
+    "dashboard:view": true,
+    "user:read": false,
+    "user:manage": false,
+    "settings:read": true,
+    "settings:update": false,
+    "audit:read": false,
+  },
+  viewer: {
+    "dashboard:view": true,
+    "user:read": false,
+    "user:manage": false,
+    "settings:read": false,
+    "settings:update": false,
+    "audit:read": false,
+  },
+};
+
+const actorFor = (role: Role): Actor => ({
+  id: `id-${role}`,
+  email: `${role}@example.test`,
+  name: role,
+  role,
+});
+
+describe("RBAC matrix", () => {
+  for (const role of ROLES) {
+    for (const permission of PERMISSIONS) {
+      it(`${role} ${EXPECTED[role][permission] ? "can" : "cannot"} ${permission}`, () => {
+        expect(can(role, permission)).toBe(EXPECTED[role][permission]);
+      });
+    }
+  }
+
+  it("covers every role and permission in the golden table", () => {
+    expect(Object.keys(EXPECTED).sort()).toEqual([...ROLES].sort());
+    for (const role of ROLES) {
+      expect(Object.keys(EXPECTED[role]).sort()).toEqual([...PERMISSIONS].sort());
+      expect([...ROLE_PERMISSIONS[role]].sort()).toEqual(
+        PERMISSIONS.filter((p) => EXPECTED[role][p]).sort(),
+      );
+    }
+  });
+
+  it("denies unknown, empty and malformed roles", () => {
+    for (const bad of [undefined, null, "", "admin", "OWNER", "owner ", 0, {}, ["owner"]]) {
+      expect(isRole(bad)).toBe(false);
+      for (const p of PERMISSIONS) expect(can(bad, p)).toBe(false);
+    }
+  });
+
+  it("only owners manage users, settings and read the audit log", () => {
+    for (const role of ROLES.filter((r) => r !== "owner")) {
+      expect(can(role, "user:manage")).toBe(false);
+      expect(can(role, "settings:update")).toBe(false);
+      expect(can(role, "audit:read")).toBe(false);
+    }
+  });
+});
+
+describe("assertCan", () => {
+  it("rejects a missing actor as unauthenticated", () => {
+    expect(() => assertCan(null, "dashboard:view")).toThrow(UnauthorizedError);
+    expect(() => assertCan(undefined, "dashboard:view")).toThrow(UnauthorizedError);
+  });
+
+  it("rejects an actor without the permission as forbidden", () => {
+    expect(() => assertCan(actorFor("viewer"), "user:manage")).toThrow(ForbiddenError);
+  });
+
+  it("rejects an actor whose role was tampered with", () => {
+    const forged = { ...actorFor("viewer"), role: "owner " as unknown as Role };
+    expect(() => assertCan(forged, "user:manage")).toThrow(ForbiddenError);
+  });
+
+  it("allows an actor with the permission", () => {
+    expect(() => assertCan(actorFor("owner"), "user:manage")).not.toThrow();
+  });
+});

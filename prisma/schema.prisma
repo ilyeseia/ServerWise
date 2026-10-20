@@ -1,5 +1,9 @@
-// ServerWise data model. Stage 1 contains only the infrastructure table needed to
-// prove migrations work; business tables arrive with their stages.
+// ServerWise data model.
+// Stage 1: AppSetting. Stage 2: authentication (Better Auth core + admin + twoFactor + rateLimit),
+// audit log. Business tables arrive with their stages.
+//
+// Better Auth models (User, Session, Account, Verification, TwoFactor, RateLimit) must keep the
+// field names below: the Prisma adapter addresses them by name.
 
 generator client {
   provider = "prisma-client"
@@ -10,11 +14,132 @@ datasource db {
   provider = "postgresql"
 }
 
-/// Key/value application settings (used from Stage 2 for secure app configuration).
+/// Key/value application settings (validated per key in src/modules/settings).
 model AppSetting {
   key       String   @id @db.VarChar(100)
   value     Json
   updatedAt DateTime @updatedAt @db.Timestamptz(3)
 
   @@map("app_setting")
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime  @default(now()) @updatedAt @db.Timestamptz(3)
+
+  // admin plugin
+  role       String?
+  banned     Boolean?  @default(false)
+  banReason  String?
+  banExpires DateTime? @db.Timestamptz(3)
+
+  // twoFactor plugin
+  twoFactorEnabled Boolean? @default(false)
+
+  // ServerWise security fields
+  mustChangePassword Boolean   @default(false)
+  failedLoginCount   Int       @default(0)
+  lockedUntil        DateTime? @db.Timestamptz(3)
+
+  sessions   Session[]
+  accounts   Account[]
+  twoFactors TwoFactor[]
+
+  @@map("user")
+}
+
+model Session {
+  id             String   @id
+  expiresAt      DateTime @db.Timestamptz(3)
+  token          String   @unique
+  createdAt      DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  ipAddress      String?
+  userAgent      String?
+  userId         String
+  impersonatedBy String?
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime? @db.Timestamptz(3)
+  refreshTokenExpiresAt DateTime? @db.Timestamptz(3)
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime  @default(now()) @updatedAt @db.Timestamptz(3)
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime @db.Timestamptz(3)
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model TwoFactor {
+  id                      String    @id
+  secret                  String
+  backupCodes             String
+  userId                  String
+  verified                Boolean?  @default(true)
+  failedVerificationCount Int?      @default(0)
+  lockedUntil             DateTime? @db.Timestamptz(3)
+  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("two_factor")
+}
+
+model RateLimit {
+  id          String @id
+  key         String @unique
+  count       Int
+  lastRequest BigInt
+
+  @@map("rate_limit")
+}
+
+/// Append-only security/business audit trail. UPDATE and DELETE are blocked by a database trigger
+/// (see the migration). No foreign keys, so history survives user deletion.
+model AuditLog {
+  id         String   @id @default(uuid(7))
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  actorId    String?
+  actorEmail String?
+  action     String   @db.VarChar(100)
+  entityType String?  @db.VarChar(100)
+  entityId   String?
+  ip         String?
+  userAgent  String?
+  metadata   Json?
+
+  @@index([createdAt(sort: Desc)])
+  @@index([action])
+  @@index([actorId])
+  @@map("audit_log")
 }
