@@ -9,7 +9,16 @@ export const E2E_EMAIL_DOMAIN = "e2e.example.test";
 /** Every CRM record created by e2e starts with this, so teardown can find and remove it. */
 export const E2E_DATA_PREFIX = "ZZ E2E";
 
+/** The fake AI provider (tests/e2e/fake-ai-server.mjs) the application is pointed at. */
+export const E2E_AI_PORT = Number(process.env.E2E_AI_PORT ?? 3199);
+export const E2E_AI_KEY = "e2e-fake-ai-key-0123456789";
+
 export const serverEnv = {
+  AI_PROVIDER: "openai_compatible",
+  AI_BASE_URL: `http://127.0.0.1:${E2E_AI_PORT}`,
+  AI_API_KEY: E2E_AI_KEY,
+  AI_MODEL: "e2e-model",
+  AI_TIMEOUT_MS: "10000",
   APP_URL: E2E_URL,
   AUTH_SECRET: E2E_AUTH_SECRET,
   // The e2e owner has no authenticator; the 2FA gate itself is covered by unit/integration tests.
@@ -42,6 +51,8 @@ export interface E2EFixture {
   assetId: string;
   /** A maintenance contract with one overdue visit ("ZZ E2E Overdue check"). */
   contractId: string;
+  /** An open support ticket of the fixture customer. */
+  ticketId: string;
   /** A backup policy with a recent backup that was never restored. */
   policyId: string;
   /** Draft remote access plans: compliant, and two with a gap (no explanation written). */

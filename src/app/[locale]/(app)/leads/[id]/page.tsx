@@ -19,6 +19,8 @@ import { listQuotes } from "@/modules/quotes/service";
 import { actionContext } from "@/server/actions";
 import { orNotFound, requirePagePermission } from "@/server/auth/page-guard";
 import { can } from "@/server/authz/permissions";
+import { AiAssist } from "@/components/ai/ai-assist";
+import { canRunTool } from "@/modules/ai/tools";
 import { AdvisorResults } from "../advisor-results";
 import { AdvisorRunner } from "../advisor-runner";
 import { CreateQuote } from "../create-quote";
@@ -52,6 +54,7 @@ export default async function LeadPage({ params, searchParams }: Props) {
     ]);
   const tr = await getTranslations("Requirements");
   const tAdvisor = await getTranslations("Advisor");
+  const tAi = await getTranslations("Ai");
 
   // The advisor needs both CRM and catalog access (technicians read results; sales can run it).
   const advisorVisible =
@@ -184,7 +187,17 @@ export default async function LeadPage({ params, searchParams }: Props) {
             ) : null}
 
             {selected ? (
-              <AdvisorResults view={selected} />
+              <div className="flex flex-col gap-6">
+                <AdvisorResults view={selected} />
+                {canRunTool(session.actor.role, "explain_recommendation") ? (
+                  <AiAssist
+                    key={selected.id}
+                    tool="explain_recommendation"
+                    input={{ recommendationId: selected.id }}
+                    label={tAi("explainRecommendation")}
+                  />
+                ) : null}
+              </div>
             ) : (
               <p className="text-sm text-muted-foreground">{tAdvisor("noRuns")}</p>
             )}

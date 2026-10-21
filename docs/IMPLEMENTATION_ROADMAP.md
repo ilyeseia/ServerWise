@@ -29,8 +29,9 @@ Workflow for **every** stage: explain (Arabic) → implement → verify (lint, t
 | 5     | Approved and published (`3aa41ce`; quotations)                     |
 | 6     | Approved and published (`2e52fbd`; ProjectFlow)                    |
 | 7     | Approved and published (`dc31efb`; assets, tickets, maintenance)   |
-| 8     | Implemented, pending approval (backups, remote-access plans)       |
-| 9–11  | Not started                                                        |
+| 8     | Approved and published (`3748b51`; backups, remote-access plans)   |
+| 9     | Implemented, pending approval (AI assistant)                       |
+| 10–11 | Not started                                                        |
 
 ## Cross-cutting each stage
 

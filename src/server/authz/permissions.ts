@@ -59,6 +59,8 @@ export const PERMISSIONS = [
   "remote:write",
   /** Approve a remote access plan. Owner only: it is the check on what staff propose. */
   "remote:approve",
+  // The AI assistant (Stage 9). It only reads what the user may already read and writes text.
+  "ai:use",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -85,6 +87,7 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "maintenance:write",
     "backup:read",
     "remote:read",
+    "ai:use",
   ],
   technician: [
     "dashboard:view",
@@ -106,6 +109,7 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "backup:record",
     "remote:read",
     "remote:write",
+    "ai:use",
   ],
   viewer: ["dashboard:view"],
 };

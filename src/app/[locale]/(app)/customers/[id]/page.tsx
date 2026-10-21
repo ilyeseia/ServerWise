@@ -1,5 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getAppFormatter } from "@/i18n/format";
+import { AiAssist } from "@/components/ai/ai-assist";
+import { canRunTool } from "@/modules/ai/tools";
 import { ArchiveControls } from "@/components/crm/archive-controls";
 import { CustomerStatusBadge, LeadStatusBadge } from "@/components/crm/badges";
 import { CommunicationsPanel } from "@/components/crm/communications-panel";
@@ -49,6 +51,7 @@ export default async function CustomerPage({ params }: Props) {
 
   const archived = customer.status === "archived";
   const tCare = await getTranslations("Care");
+  const tAi = await getTranslations("Ai");
   const careLinks = [
     can(role, "asset:read") && { href: `/assets?customerId=${id}`, label: tCare("assets") },
     can(role, "ticket:read") && { href: `/tickets?customerId=${id}`, label: tCare("tickets") },
@@ -233,6 +236,30 @@ export default async function CustomerPage({ params }: Props) {
           />
         </CardContent>
       </Card>
+
+      {canRunTool(role, "summarize_customer") ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{tAi("title")}</CardTitle>
+            <p className="text-sm text-muted-foreground">{tAi("subtitle")}</p>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-8">
+            <AiAssist
+              tool="summarize_customer"
+              input={{ customerId: id }}
+              label={tAi("summarizeCustomer")}
+            />
+            {canRunTool(role, "draft_followup_message") && !archived ? (
+              <AiAssist
+                tool="draft_followup_message"
+                input={{ customerId: id }}
+                label={tAi("draftFollowUp")}
+                askGoal={{ label: tAi("goal"), placeholder: tAi("goalPlaceholder") }}
+              />
+            ) : null}
+          </CardContent>
+        </Card>
+      ) : null}
 
       {careLinks.length > 0 ? (
         <Card>

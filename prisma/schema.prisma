@@ -1147,3 +1147,32 @@ model RemoteAccessPlan {
   @@index([status])
   @@map("remote_access_plan")
 }
+
+enum AiRequestStatus {
+  ok
+  unavailable
+  invalid
+  limited
+  error
+}
+
+/// A log of AI assistant calls: who asked, which tool, how big, how long, what happened. It never
+/// stores the prompt or the answer (they can contain customer data). Append-only.
+model AiRequest {
+  id          String          @id @default(uuid(7))
+  userId      String?
+  tool        String          @db.VarChar(60)
+  status      AiRequestStatus
+  provider    String?         @db.VarChar(40)
+  model       String?         @db.VarChar(80)
+  inputChars  Int             @default(0)
+  outputChars Int             @default(0)
+  latencyMs   Int             @default(0)
+  /// A short machine code such as "timeout" or "rate_limited"; never a provider message.
+  errorCode   String?         @db.VarChar(60)
+  createdAt   DateTime        @default(now()) @db.Timestamptz(3)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+  @@map("ai_request")
+}

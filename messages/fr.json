@@ -560,7 +560,8 @@
       "RECOVERY_MISSING": "Rédigez d'abord les étapes de restauration.",
       "PLAN_LOCKED": "Ce plan ne peut plus être modifié. Un plan approuvé se retire puis se remplace par un nouveau plan.",
       "PLAN_CUSTOMER_FIXED": "Un plan ne peut pas changer de client.",
-      "GAPS_NOT_EXPLAINED": "Le plan s'écarte de la politique de sécurité. Expliquez chaque écart par écrit avant l'approbation."
+      "GAPS_NOT_EXPLAINED": "Le plan s'écarte de la politique de sécurité. Expliquez chaque écart par écrit avant l'approbation.",
+      "UNKNOWN_TOOL": "Outil de l'assistant inconnu."
     }
   },
   "Requirements": {
@@ -1547,5 +1548,48 @@
       "noSubnetOrExit": "Ni routeur de sous-réseau ni nœud de sortie",
       "mfa": "Authentification multifacteur sur les comptes"
     }
+  },
+  "Ai": {
+    "title": "Assistant IA",
+    "subtitle": "Il explique, résume et rédige des brouillons, rien de plus. Il ne calcule aucun prix, ne décide d'aucun droit, n'approuve ni n'envoie rien : la décision vous revient toujours.",
+    "thinking": "Réflexion en cours…",
+    "explainRecommendation": "Expliquer cette recommandation",
+    "summarizeCustomer": "Résumer le dossier de ce client",
+    "summarizeTicket": "Résumer ce ticket",
+    "draftFollowUp": "Rédiger un brouillon de relance",
+    "draftHandover": "Rédiger un brouillon de notes de livraison",
+    "handoverHint": "Un texte à copier et à relire. Rien n'est enregistré automatiquement et il ne contient aucun identifiant.",
+    "goal": "Objectif du message",
+    "goalPlaceholder": "Ex. : rappeler au client le devis envoyé la semaine dernière",
+    "answer": "Réponse de l'assistant",
+    "draftNotice": "Brouillon généré par IA : relisez-le avant tout usage. Les chiffres viennent du système, l'assistant ne les calcule pas.",
+    "copy": "Copier le texte",
+    "copied": "Copié",
+    "basedOn": "Basé sur {count} enregistrement(s)",
+    "remaining": "Restant aujourd'hui : {count}",
+    "invalid": "La réponse de l'assistant n'avait pas un format valide et n'est pas affichée. Réessayez.",
+    "limited": "Vous avez utilisé votre quota quotidien de demandes à l'assistant ({limit}). Il se renouvelle demain.",
+    "needsConfirmation": "Cette action est sensible et exige une confirmation humaine explicite.",
+    "redacted": "Un texte ressemblant à un mot de passe ou à une clé a été retiré de la réponse. N'entrez pas d'identifiants dans cet outil.",
+    "unavailable": {
+      "not_configured": "L'assistant IA n'est pas activé. Le reste du système fonctionne normalement.",
+      "timeout": "L'assistant met trop de temps à répondre. Réessayez plus tard ; le reste du système fonctionne.",
+      "network": "Le service de l'assistant est injoignable. Le reste du système fonctionne normalement.",
+      "auth": "Le service de l'assistant a refusé la clé configurée. Le propriétaire doit la vérifier sur le serveur.",
+      "rate_limited": "Le service de l'assistant est occupé. Réessayez dans un instant.",
+      "provider_error": "Le service de l'assistant a rencontré un problème. Réessayez plus tard ; le reste du système fonctionne."
+    },
+    "settingsTitle": "Assistant IA",
+    "settingsOn": "Activé",
+    "settingsOff": "Désactivé",
+    "settingsProvider": "Fournisseur",
+    "settingsModel": "Modèle",
+    "settingsLimit": "Limite quotidienne par utilisateur : {count}",
+    "settingsReason": {
+      "not_configured": "Aucun fournisseur n'est configuré.",
+      "invalid_config": "La configuration est invalide. Vérifiez ces variables dans le fichier d'environnement :",
+      "disabled_by_limit": "La limite quotidienne est à zéro : l'assistant est désactivé pour tous."
+    },
+    "settingsHelp": "Se configure par variables d'environnement sur le serveur (AI_PROVIDER, AI_API_KEY, AI_MODEL…). La clé n'est pas stockée en base de données et n'est jamais affichée ici."
   }
 }

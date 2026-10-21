@@ -10,6 +10,8 @@ import { getProject, listProjectStaff } from "@/modules/projects/service";
 import { actionContext } from "@/server/actions";
 import { orNotFound, requirePagePermission } from "@/server/auth/page-guard";
 import { can } from "@/server/authz/permissions";
+import { AiAssist } from "@/components/ai/ai-assist";
+import { canRunTool } from "@/modules/ai/tools";
 import { ProjectPanel } from "./project-panel";
 import { TasksBoard } from "./tasks-board";
 
@@ -32,6 +34,7 @@ export default async function ProjectPage({ params }: Props) {
     getTranslations("Projects"),
     getAppFormatter(),
   ]);
+  const tAi = await getTranslations("Ai");
 
   const closed = isProjectClosed(project.status);
   const canManage = can(role, "project:manage");
@@ -115,6 +118,22 @@ export default async function ProjectPage({ params }: Props) {
           />
         </CardContent>
       </Card>
+
+      {canRunTool(role, "draft_handover_notes") && !closed ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{tAi("title")}</CardTitle>
+            <p className="text-sm text-muted-foreground">{tAi("handoverHint")}</p>
+          </CardHeader>
+          <CardContent>
+            <AiAssist
+              tool="draft_handover_notes"
+              input={{ projectId: project.id }}
+              label={tAi("draftHandover")}
+            />
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>

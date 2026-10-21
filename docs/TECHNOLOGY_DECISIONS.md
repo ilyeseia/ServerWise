@@ -96,6 +96,8 @@
 
 **Stage 8 notes:** no new dependencies. Backup health is derived (a backup is trusted only once a restore has been proven), not entered. Ordering of same-day entries uses `createdAt` as the tie-break - found by an end-to-end test where a failed drill entered after a successful one on the same day was hidden. The documented dump/restore commands were executed against a real instance (42 tables, 26 triggers and all migrations reproduced) before being written down; the application deliberately does not run backups itself.
 
+**Stage 9 notes:** no new dependencies and no vendor SDK. Providers are small `fetch` clients (Anthropic Messages, OpenAI chat completions, and any OpenAI-compatible server), which keeps the dependency tree and the supply-chain surface unchanged and makes failures easy to map to typed codes. The model id is deliberately not defaulted: the owner chooses the provider, model and budget (the open decision from Stage 0). Requests are verified against a local stand-in server in unit tests and end-to-end tests; they have not been run against live services. Google Gemini is not implemented (the interface supports adding it).
+
 ### 2.6 Authorization — own RBAC matrix
 
 - Roles → permissions mapped in code, enforced in the **server** data-access layer; UI hiding is cosmetic only. CASL (`@casl/ability` 7.0.2) is evaluated in Stage 2; adopted only if attribute-level rules (e.g. "technician sees only assigned projects") get complex.

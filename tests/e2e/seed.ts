@@ -512,6 +512,14 @@ async function main() {
       const gapPlanA = await plan("Gap plan A", { mfa: false });
       const gapPlanB = await plan("Gap plan B", { noPublicExposure: false });
 
+      const tickets = await import("@/modules/careops/tickets");
+      const fixtureTicket = await tickets.createTicket(salesCtx, {
+        customerId: customer.id,
+        title: `${E2E_DATA_PREFIX} Fixture ticket`,
+        description: "The VPN drops every morning",
+        priority: "high",
+      });
+
       process.stdout.write(`E2E_USERS=${JSON.stringify(users)}\n`);
       process.stdout.write(
         `E2E_FIXTURE=${JSON.stringify({
@@ -527,6 +535,7 @@ async function main() {
           projectId: fixtureProject.id,
           assetId: fixtureAsset.id,
           contractId: fixtureContract.id,
+          ticketId: fixtureTicket.id,
           policyId: fixturePolicy.id,
           planOkId: okPlan.id,
           planGapAId: gapPlanA.id,

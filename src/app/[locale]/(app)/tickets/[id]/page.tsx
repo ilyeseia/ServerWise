@@ -1,6 +1,8 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { TicketPriorityBadge, TicketStatusBadge } from "@/components/care/badges";
 import { TicketControls } from "@/components/care/ticket-controls";
+import { AiAssist } from "@/components/ai/ai-assist";
+import { canRunTool } from "@/modules/ai/tools";
 import { Alert } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAppFormatter } from "@/i18n/format";
@@ -28,6 +30,7 @@ export default async function TicketPage({ params }: Props) {
     getTranslations("Tickets"),
     getAppFormatter(),
   ]);
+  const tAi = await getTranslations("Ai");
   const when = (d: Date) => format.dateTime(d, { dateStyle: "medium", timeStyle: "short" });
 
   return (
@@ -70,6 +73,21 @@ export default async function TicketPage({ params }: Props) {
         <Alert variant="success">
           <strong>{t("resolution")}:</strong> {ticket.resolution}
         </Alert>
+      ) : null}
+
+      {canRunTool(role, "summarize_ticket") ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{tAi("title")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AiAssist
+              tool="summarize_ticket"
+              input={{ ticketId: ticket.id }}
+              label={tAi("summarizeTicket")}
+            />
+          </CardContent>
+        </Card>
       ) : null}
 
       <Card>

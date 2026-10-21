@@ -91,6 +91,11 @@ Conventions: UUIDv7/cuid ids, `createdAt/updatedAt`, soft-delete only where hist
 - Health is computed from the records (`rules.ts`), never typed: backup status (failed / overdue / partial / ok), restore status (never tested / failed / overdue / ok) and their combination (critical / warning / ok). A policy with no proven restore is at best `warning` (FR-9).
 - Runs and drills are append-only (triggers); entries are dated by day, so ties are broken by insertion time. A plan's approval rule (the five safeguards from SECURITY_MODEL §8, or a written reason for each departure) is a pure function, repeated as a CHECK; approved plans are frozen by a trigger and replaced, not edited.
 
+**Implemented in Stage 9 (`src/modules/ai`; see [AI](AI.md)):**
+
+- One gateway (`runAiTool`) is the only way to reach a model: permission check (`ai:use` + the tool's own), input validation, risk gate (`read` / `draft` / `sensitive`), configuration and per-user daily allowance, data read through the normal services as the user, untrusted-data wrapping with personal data masked, a schema-validated JSON answer scrubbed of secrets, and a log line without content (`ai_request`, append-only).
+- Tools are read-only by construction (an import allow-list enforced by a test). The provider interface has three implementations over plain `fetch`; every failure becomes a typed `AiUnavailableError`/`AiInvalidError` without provider text. AI configuration is parsed independently from the application's environment, so an AI misconfiguration only disables the assistant.
+
 ## 5. Key flows
 
 - **Enquiry → quote:** Lead → questionnaire → advisor ranks products using fresh verified offers → quote draft → review → issue (snapshot) → accept → project.
