@@ -165,8 +165,9 @@ export default async function QuotePage({ params, searchParams }: Props) {
         <CardContent className="flex flex-col gap-4">
           {editable && pricing ? (
             <QuoteEditor
-              // A new key remounts the editor when the saved revision changes.
-              key={`${selected.id}-${selected.calculation.total}-${selected.lines.length}`}
+              // Remount only for another revision. Remounting on every save would wipe the "saved" message
+              // the moment the refreshed page arrives (it made CI flaky on slow machines).
+              key={selected.id}
               revisionId={selected.id}
               initialLines={editorLines}
               initialNotes={selected.notes ?? ""}
