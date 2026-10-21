@@ -38,6 +38,10 @@ export interface E2EFixture {
   supplierId: string;
   /** A planned project (from an accepted quotation) on the fixture lead. */
   projectId: string;
+  /** A server asset of the fixture customer (warranty ending soon). */
+  assetId: string;
+  /** A maintenance contract with one overdue visit ("ZZ E2E Overdue check"). */
+  contractId: string;
 }
 
 /** Where the seed writes each role's signed-in browser state. */

@@ -38,6 +38,17 @@ export const PERMISSIONS = [
   "project:write",
   /** Create a project from a quotation, change its status, plan and hand it over. */
   "project:manage",
+  // Customer assets, support tickets and maintenance (Stage 7).
+  "asset:read",
+  "asset:write",
+  "ticket:read",
+  /** Open tickets, comment and move them through their states. */
+  "ticket:write",
+  "maintenance:read",
+  /** Contracts and schedules: the commercial side. */
+  "maintenance:write",
+  /** Record the visits actually performed. */
+  "maintenance:perform",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -57,6 +68,11 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "project:read",
     "project:write",
     "project:manage",
+    "asset:read",
+    "ticket:read",
+    "ticket:write",
+    "maintenance:read",
+    "maintenance:write",
   ],
   technician: [
     "dashboard:view",
@@ -67,6 +83,12 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "quote:read",
     "project:read",
     "project:write",
+    "asset:read",
+    "asset:write",
+    "ticket:read",
+    "ticket:write",
+    "maintenance:read",
+    "maintenance:perform",
   ],
   viewer: ["dashboard:view"],
 };

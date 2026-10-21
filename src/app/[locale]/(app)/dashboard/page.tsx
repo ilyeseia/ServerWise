@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getAppFormatter } from "@/i18n/format";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { resolveLocale } from "@/i18n/locale";
+import { getCareStats } from "@/modules/careops/stats";
 import { LEAD_STATUSES } from "@/modules/crm/lead-status";
 import { getCrmStats } from "@/modules/crm/stats";
 import { actionContext } from "@/server/actions";
@@ -39,6 +40,8 @@ export default async function DashboardPage({ params }: Props) {
   ]);
   const database = await checkDatabase();
   const crm = can(session.actor.role, "crm:read") ? await getCrmStats(await actionContext()) : null;
+  const care = await getCareStats(await actionContext());
+  const showCare = care.tickets !== null || care.maintenance !== null || care.assets !== null;
   const crmIsEmpty =
     crm !== null &&
     crm.customers.prospect + crm.customers.active === 0 &&
@@ -104,6 +107,56 @@ export default async function DashboardPage({ params }: Props) {
                 ))}
               </ul>
             </div>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {showCare ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("careTitle")}</CardTitle>
+            <CardDescription>{t("careDescription")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3" data-testid="care-stats">
+              {care.tickets ? (
+                <>
+                  <Stat
+                    label={t("openTickets")}
+                    value={format.number(care.tickets.open)}
+                    testId="stat-open-tickets"
+                  />
+                  <Stat
+                    label={t("urgentTickets")}
+                    value={format.number(care.tickets.urgent)}
+                    tone={care.tickets.urgent > 0 ? "danger" : undefined}
+                    testId="stat-urgent-tickets"
+                  />
+                </>
+              ) : null}
+              {care.maintenance ? (
+                <>
+                  <Stat
+                    label={t("overdueMaintenance")}
+                    value={format.number(care.maintenance.overdue)}
+                    tone={care.maintenance.overdue > 0 ? "danger" : undefined}
+                    testId="stat-overdue-maintenance"
+                  />
+                  <Stat
+                    label={t("dueSoonMaintenance")}
+                    value={format.number(care.maintenance.dueSoon)}
+                    testId="stat-due-soon-maintenance"
+                  />
+                </>
+              ) : null}
+              {care.assets ? (
+                <Stat
+                  label={t("warrantyExpiring")}
+                  value={format.number(care.assets.warrantyExpiring)}
+                  testId="stat-warranty-expiring"
+                />
+              ) : null}
+            </dl>
           </CardContent>
         </Card>
       ) : null}

@@ -51,10 +51,12 @@ model User {
   twoFactors TwoFactor[]
 
   // CRM ownership (set null when a user is removed so customer history is kept)
-  ownedLeads        Lead[]     @relation("LeadOwner")
-  managedProjects   Project[]  @relation("ProjectManager")
-  assignedTasks     Task[]     @relation("TaskAssignee")
-  assignedFollowUps FollowUp[] @relation("FollowUpAssignee")
+  ownedLeads        Lead[]                @relation("LeadOwner")
+  managedProjects   Project[]             @relation("ProjectManager")
+  assignedTickets   Ticket[]              @relation("TicketAssignee")
+  assignedSchedules MaintenanceSchedule[] @relation("ScheduleAssignee")
+  assignedTasks     Task[]                @relation("TaskAssignee")
+  assignedFollowUps FollowUp[]            @relation("FollowUpAssignee")
 
   @@map("user")
 }
@@ -241,6 +243,10 @@ model Customer {
   contacts       Contact[]
   leads          Lead[]
   followUps      FollowUp[]
+  assets         Asset[]
+  contracts      MaintenanceContract[]
+  tickets        Ticket[]
+  serviceReports ServiceReport[]
   communications Communication[]
 
   @@index([name])
@@ -316,9 +322,10 @@ model FollowUp {
   createdAt     DateTime       @default(now()) @db.Timestamptz(3)
   updatedAt     DateTime       @default(now()) @updatedAt @db.Timestamptz(3)
 
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
-  lead       Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
-  assignedTo User?    @relation("FollowUpAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  customer             Customer              @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  lead                 Lead?                 @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  assignedTo           User?                 @relation("FollowUpAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  maintenanceReminders MaintenanceReminder[]
 
   @@index([status, dueAt])
   @@index([assignedToId, status])
@@ -455,6 +462,7 @@ model Product {
 
   offers     SupplierOffer[]
   quoteLines QuoteLine[]
+  assets     Asset[]
 
   @@index([category])
   @@index([brand, model])
@@ -695,6 +703,7 @@ model Project {
   manager    User?       @relation("ProjectManager", fields: [managerId], references: [id], onDelete: SetNull)
   milestones Milestone[]
   tasks      Task[]
+  assets     Asset[]
 
   @@index([leadId])
   @@index([status])
@@ -772,4 +781,229 @@ model ChecklistItem {
 
   @@index([taskId, position])
   @@map("checklist_item")
+}
+
+enum AssetKind {
+  server
+  nas
+  workstation
+  network_device
+  ups
+  software_service
+  subscription
+  other
+}
+
+enum AssetStatus {
+  active
+  faulty
+  retired
+}
+
+enum TicketStatus {
+  open
+  in_progress
+  waiting_customer
+  resolved
+  closed
+}
+
+enum TicketPriority {
+  low
+  normal
+  high
+  urgent
+}
+
+/// Per-year counter for ticket numbers.
+model TicketCounter {
+  year Int @id
+  last Int
+
+  @@map("ticket_counter")
+}
+
+/// Something installed or subscribed at a customer: hardware, a service, network gear.
+/// Credentials are NEVER stored here; `credentialsRef` only says where they are kept.
+model Asset {
+  id             String      @id @default(uuid(7))
+  customerId     String
+  projectId      String?
+  productId      String?
+  kind           AssetKind
+  name           String      @db.VarChar(160)
+  brand          String?     @db.VarChar(80)
+  model          String?     @db.VarChar(120)
+  serialNumber   String?     @db.VarChar(120)
+  os             String?     @db.VarChar(120)
+  version        String?     @db.VarChar(60)
+  location       String?     @db.VarChar(200)
+  installedAt    DateTime?   @db.Timestamptz(3)
+  /// End of the hardware warranty.
+  warrantyUntil  DateTime?   @db.Timestamptz(3)
+  /// Renewal date of a subscription or licence.
+  renewsAt       DateTime?   @db.Timestamptz(3)
+  status         AssetStatus @default(active)
+  /// Where the access credentials are kept (for example a password-manager item), never the secrets.
+  credentialsRef String?     @db.VarChar(300)
+  notes          String?     @db.VarChar(1000)
+  createdById    String?
+  createdAt      DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime    @default(now()) @updatedAt @db.Timestamptz(3)
+
+  customer       Customer        @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  project        Project?        @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  product        Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  contracts      ContractAsset[]
+  tickets        Ticket[]
+  serviceReports ServiceReport[]
+
+  @@index([customerId])
+  @@index([status])
+  @@index([warrantyUntil])
+  @@map("asset")
+}
+
+model MaintenanceContract {
+  id            String    @id @default(uuid(7))
+  customerId    String
+  title         String    @db.VarChar(200)
+  startsAt      DateTime  @db.Timestamptz(3)
+  endsAt        DateTime  @db.Timestamptz(3)
+  /// Agreed monthly fee in DZD (exact decimal); null = not stated.
+  monthlyFeeDzd Decimal?  @db.Decimal(14, 2)
+  notes         String?   @db.VarChar(1000)
+  cancelledAt   DateTime? @db.Timestamptz(3)
+  cancelReason  String?   @db.VarChar(300)
+  createdById   String?
+  createdAt     DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime  @default(now()) @updatedAt @db.Timestamptz(3)
+
+  customer  Customer              @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  assets    ContractAsset[]
+  schedules MaintenanceSchedule[]
+
+  @@index([customerId])
+  @@index([endsAt])
+  @@map("maintenance_contract")
+}
+
+model ContractAsset {
+  contractId String
+  assetId    String
+
+  contract MaintenanceContract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  asset    Asset               @relation(fields: [assetId], references: [id], onDelete: Restrict)
+
+  @@id([contractId, assetId])
+  @@index([assetId])
+  @@map("contract_asset")
+}
+
+/// A recurring visit. The next due date is computed (see src/modules/careops/rules.ts).
+model MaintenanceSchedule {
+  id             String    @id @default(uuid(7))
+  contractId     String
+  title          String    @db.VarChar(200)
+  intervalMonths Int
+  /// First due date.
+  anchorDate     DateTime  @db.Timestamptz(3)
+  lastDoneAt     DateTime? @db.Timestamptz(3)
+  active         Boolean   @default(true)
+  assigneeId     String?
+  createdById    String?
+  createdAt      DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime  @default(now()) @updatedAt @db.Timestamptz(3)
+
+  contract       MaintenanceContract   @relation(fields: [contractId], references: [id], onDelete: Restrict)
+  assignee       User?                 @relation("ScheduleAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  reminders      MaintenanceReminder[]
+  serviceReports ServiceReport[]
+
+  @@index([contractId])
+  @@index([active])
+  @@map("maintenance_schedule")
+}
+
+/// One reminder per schedule and due date: the unique key makes generation idempotent.
+model MaintenanceReminder {
+  id         String   @id @default(uuid(7))
+  scheduleId String
+  dueDate    DateTime @db.Timestamptz(3)
+  followUpId String?
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+
+  schedule MaintenanceSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  followUp FollowUp?           @relation(fields: [followUpId], references: [id], onDelete: SetNull)
+
+  @@unique([scheduleId, dueDate])
+  @@map("maintenance_reminder")
+}
+
+/// A record of a visit. Append-only, like the conversation log.
+model ServiceReport {
+  id            String   @id @default(uuid(7))
+  customerId    String
+  scheduleId    String?
+  ticketId      String?
+  assetId       String?
+  performedAt   DateTime @db.Timestamptz(3)
+  performedById String?
+  summary       String   @db.VarChar(2000)
+  partsReplaced String?  @db.VarChar(1000)
+  createdAt     DateTime @default(now()) @db.Timestamptz(3)
+
+  customer Customer             @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  schedule MaintenanceSchedule? @relation(fields: [scheduleId], references: [id], onDelete: SetNull)
+  ticket   Ticket?              @relation(fields: [ticketId], references: [id], onDelete: SetNull)
+  asset    Asset?               @relation(fields: [assetId], references: [id], onDelete: SetNull)
+
+  @@index([customerId, performedAt(sort: Desc)])
+  @@index([scheduleId])
+  @@map("service_report")
+}
+
+model Ticket {
+  id          String         @id @default(uuid(7))
+  /// Human-facing number such as T-2026-0001.
+  number      String         @unique @db.VarChar(20)
+  customerId  String
+  assetId     String?
+  title       String         @db.VarChar(200)
+  description String?        @db.VarChar(4000)
+  priority    TicketPriority @default(normal)
+  status      TicketStatus   @default(open)
+  assigneeId  String?
+  /// Required when the ticket is resolved.
+  resolution  String?        @db.VarChar(2000)
+  resolvedAt  DateTime?      @db.Timestamptz(3)
+  closedAt    DateTime?      @db.Timestamptz(3)
+  createdById String?
+  createdAt   DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime       @default(now()) @updatedAt @db.Timestamptz(3)
+
+  customer       Customer        @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  asset          Asset?          @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  assignee       User?           @relation("TicketAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  comments       TicketComment[]
+  serviceReports ServiceReport[]
+
+  @@index([customerId])
+  @@index([status, priority])
+  @@index([assigneeId, status])
+  @@map("ticket")
+}
+
+/// Append-only discussion on a ticket.
+model TicketComment {
+  id        String   @id @default(uuid(7))
+  ticketId  String
+  authorId  String?
+  body      String   @db.VarChar(2000)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+
+  @@index([ticketId, createdAt])
+  @@map("ticket_comment")
 }

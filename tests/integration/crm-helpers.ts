@@ -51,6 +51,27 @@ export async function deleteCustomers(ids: string[]): Promise<void> {
     await tx.$executeRawUnsafe(
       `ALTER TABLE "recommendation" ENABLE TRIGGER recommendation_no_update_delete`,
     );
+    // Care-ops records are history (triggers); the guards are lifted for this transaction only.
+    const careGuards: [string, string][] = [
+      ["service_report", "service_report_no_update_delete"],
+      ["ticket_comment", "ticket_comment_no_update_delete"],
+      ["ticket", "ticket_guard"],
+    ];
+    for (const [table, trigger] of careGuards) {
+      await tx.$executeRawUnsafe(`ALTER TABLE "${table}" DISABLE TRIGGER ${trigger}`);
+    }
+    const careWhere = { customerId: { in: ids } };
+    await tx.serviceReport.deleteMany({ where: careWhere });
+    await tx.ticketComment.deleteMany({ where: { ticket: careWhere } });
+    await tx.ticket.deleteMany({ where: careWhere });
+    await tx.maintenanceReminder.deleteMany({ where: { schedule: { contract: careWhere } } });
+    await tx.maintenanceSchedule.deleteMany({ where: { contract: careWhere } });
+    await tx.contractAsset.deleteMany({ where: { contract: careWhere } });
+    await tx.maintenanceContract.deleteMany({ where: careWhere });
+    await tx.asset.deleteMany({ where: careWhere });
+    for (const [table, trigger] of careGuards) {
+      await tx.$executeRawUnsafe(`ALTER TABLE "${table}" ENABLE TRIGGER ${trigger}`);
+    }
     // Projects are history (triggers); the guards are lifted for this transaction only.
     const projectGuards: [string, string][] = [
       ["project", "project_guard"],

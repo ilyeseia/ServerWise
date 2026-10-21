@@ -104,6 +104,27 @@ async function main() {
       await tx.$executeRawUnsafe(
         `ALTER TABLE "recommendation" ENABLE TRIGGER recommendation_no_update_delete`,
       );
+      // Care-ops records are history (triggers); the guards are lifted for this transaction only.
+      const careGuards: [string, string][] = [
+        ["service_report", "service_report_no_update_delete"],
+        ["ticket_comment", "ticket_comment_no_update_delete"],
+        ["ticket", "ticket_guard"],
+      ];
+      for (const [table, trigger] of careGuards) {
+        await tx.$executeRawUnsafe(`ALTER TABLE "${table}" DISABLE TRIGGER ${trigger}`);
+      }
+      const careWhere = { customerId: { in: ids } };
+      await tx.serviceReport.deleteMany({ where: careWhere });
+      await tx.ticketComment.deleteMany({ where: { ticket: careWhere } });
+      await tx.ticket.deleteMany({ where: careWhere });
+      await tx.maintenanceReminder.deleteMany({ where: { schedule: { contract: careWhere } } });
+      await tx.maintenanceSchedule.deleteMany({ where: { contract: careWhere } });
+      await tx.contractAsset.deleteMany({ where: { contract: careWhere } });
+      await tx.maintenanceContract.deleteMany({ where: careWhere });
+      await tx.asset.deleteMany({ where: careWhere });
+      for (const [table, trigger] of careGuards) {
+        await tx.$executeRawUnsafe(`ALTER TABLE "${table}" ENABLE TRIGGER ${trigger}`);
+      }
       // Projects are history (triggers); the guards are lifted for this transaction only.
       const projectGuards: [string, string][] = [
         ["project", "project_guard"],
@@ -403,6 +424,43 @@ async function main() {
       await quotes.decideRevision(salesCtx, quote.revisionId, { decision: "accepted" });
       const fixtureProject = await projects.createProjectFromQuote(salesCtx, quote.id, "ar");
 
+      // Care operations: an asset with a warranty ending soon, and a contract whose first visit
+      // is already overdue, for the fixture customer.
+      const care = await import("@/modules/careops/assets");
+      const upkeep = await import("@/modules/careops/maintenance");
+      const technicianCtx = {
+        actor: {
+          id: users.technician!.id,
+          email: users.technician!.email,
+          name: "E2E technician",
+          role: "technician" as const,
+        },
+      };
+      const day = 86_400_000;
+      const fixtureAsset = await care.createAsset(technicianCtx, {
+        customerId: customer.id,
+        kind: "server",
+        name: `${E2E_DATA_PREFIX} Fixture server`,
+        serialNumber: "E2E-SN-0001",
+        installedAt: new Date(Date.now() - 300 * day),
+        warrantyUntil: new Date(Date.now() + 10 * day),
+        credentialsRef: "Customer password manager, item 12",
+      });
+      const fixtureContract = await upkeep.createContract(salesCtx, {
+        customerId: customer.id,
+        title: `${E2E_DATA_PREFIX} Fixture contract`,
+        startsAt: new Date(Date.now() - 60 * day),
+        endsAt: new Date(Date.now() + 300 * day),
+        monthlyFeeDzd: "8000",
+        assetIds: [fixtureAsset.id],
+      });
+      await upkeep.createSchedule(salesCtx, fixtureContract.id, {
+        title: `${E2E_DATA_PREFIX} Overdue check`,
+        intervalMonths: 3,
+        anchorDate: new Date(Date.now() - 5 * day),
+        assigneeId: users.technician!.id,
+      });
+
       process.stdout.write(`E2E_USERS=${JSON.stringify(users)}\n`);
       process.stdout.write(
         `E2E_FIXTURE=${JSON.stringify({
@@ -416,6 +474,8 @@ async function main() {
           productCId: noPrice.id,
           supplierId: supplier.id,
           projectId: fixtureProject.id,
+          assetId: fixtureAsset.id,
+          contractId: fixtureContract.id,
         })}\n`,
       );
     } else if (command === "teardown") {

@@ -69,6 +69,19 @@ export const AUDIT_ACTIONS = [
   "task.dependency_added",
   "task.dependency_removed",
   "checklist.changed",
+  "asset.created",
+  "asset.updated",
+  "contract.created",
+  "contract.updated",
+  "contract.cancelled",
+  "schedule.created",
+  "schedule.updated",
+  "servicereport.recorded",
+  "reminder.generated",
+  "ticket.created",
+  "ticket.updated",
+  "ticket.status_changed",
+  "ticket.commented",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

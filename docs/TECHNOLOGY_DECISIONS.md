@@ -92,6 +92,8 @@
 
 **Stage 6 notes:** no new dependencies. Owner decision recorded: quotation documents are printed from the browser (_Save as PDF_); no headless Chromium in the image. Project and task rules are pure functions in `rules.ts` with the structural ones repeated as CHECKs and triggers; dependency cycles are detected with a recursive query. Task titles generated from the template are stored in the creator's language (they are editable content), while every screen string exists in ar and fr.
 
+**Stage 7 notes:** no new dependencies. The job runner chosen in Stage 0 (a Compose `worker` on a timer, no external queue) is now implemented: it reuses the `migrate` image target (full source + `tsx`), polls every `REMINDER_INTERVAL_MINUTES` (default 60) and relies on a database unique key instead of locks for idempotency. Due dates are computed, not stored, so a schedule can never disagree with its last visit. Calendar arithmetic is done in UTC on whole days. Lesson recorded in CLAUDE.md: a server component that imports a constant from a `"use client"` module gets a reference object, not the value — keep shared values in plain modules.
+
 ### 2.6 Authorization — own RBAC matrix
 
 - Roles → permissions mapped in code, enforced in the **server** data-access layer; UI hiding is cosmetic only. CASL (`@casl/ability` 7.0.2) is evaluated in Stage 2; adopted only if attribute-level rules (e.g. "technician sees only assigned projects") get complex.

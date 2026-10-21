@@ -48,6 +48,15 @@ export default async function CustomerPage({ params }: Props) {
   const tf = await getTranslations("Crm.customerForm");
 
   const archived = customer.status === "archived";
+  const tCare = await getTranslations("Care");
+  const careLinks = [
+    can(role, "asset:read") && { href: `/assets?customerId=${id}`, label: tCare("assets") },
+    can(role, "ticket:read") && { href: `/tickets?customerId=${id}`, label: tCare("tickets") },
+    can(role, "maintenance:read") && {
+      href: `/maintenance?customerId=${id}`,
+      label: tCare("contracts"),
+    },
+  ].filter((link): link is { href: string; label: string } => Boolean(link));
   const canWrite = can(role, "crm:write") && !archived;
   const dt = (d: Date) => format.dateTime(d, { dateStyle: "medium", timeStyle: "short" });
 
@@ -222,6 +231,25 @@ export default async function CustomerPage({ params }: Props) {
           />
         </CardContent>
       </Card>
+
+      {careLinks.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{tCare("title")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="flex flex-wrap gap-4 text-sm">
+              {careLinks.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="text-primary hover:underline">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      ) : null}
     </div>
   );
 }
