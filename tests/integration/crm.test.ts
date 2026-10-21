@@ -244,7 +244,10 @@ describe.skipIf(!process.env.DATABASE_URL)("CRM (integration)", () => {
     });
 
     it("rejects invalid input before touching the database", async () => {
-      const before = await getDb().customer.count();
+      // Count only the records this test could create: other test files run in parallel on the
+      // same database, so a table-wide count is not stable.
+      const mine = { name: { in: ["x", "Valid Name"] } };
+      const before = await getDb().customer.count({ where: mine });
       await expect(createCustomer(sales.ctx, { type: "individual", name: "x" })).rejects.toThrow();
       await expect(
         createCustomer(sales.ctx, { type: "individual", name: "Valid Name", phone: "abc" }),
@@ -252,7 +255,7 @@ describe.skipIf(!process.env.DATABASE_URL)("CRM (integration)", () => {
       await expect(
         createCustomer(sales.ctx, { type: "individual", name: "Valid Name", wilayaCode: 99 }),
       ).rejects.toThrow();
-      expect(await getDb().customer.count()).toBe(before);
+      expect(await getDb().customer.count({ where: mine })).toBe(before);
     });
 
     it("reports missing customers", async () => {

@@ -221,7 +221,9 @@ describe.skipIf(!process.env.DATABASE_URL)("catalog, suppliers and advisor (inte
     });
 
     it("rejects inconsistent or unsafe input before touching the database", async () => {
-      const before = await getDb().product.count();
+      // Other test files run in parallel on the same database: count only what this test could add.
+      const mine = { model: "Input", brand: { in: ["Bad", "  ", ""] } };
+      const before = await getDb().product.count({ where: mine });
       const base = { category: "nas", brand: "Bad", model: "Input" } as const;
       await expect(createProduct(sales.ctx, { ...base, ramGb: 16, ramMaxGb: 8 })).rejects.toThrow();
       await expect(
@@ -235,7 +237,7 @@ describe.skipIf(!process.env.DATABASE_URL)("catalog, suppliers and advisor (inte
       ).rejects.toThrow();
       await expect(createProduct(sales.ctx, { ...base, brand: "  " })).rejects.toThrow();
       await expect(createProduct(sales.ctx, { ...base, ramGb: -4 })).rejects.toThrow();
-      expect(await getDb().product.count()).toBe(before);
+      expect(await getDb().product.count({ where: mine })).toBe(before);
     });
 
     it("the database refuses impossible specs even if the application is bypassed", async () => {
