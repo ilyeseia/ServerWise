@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getAppFormatter } from "@/i18n/format";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { resolveLocale } from "@/i18n/locale";
+import { getBackupStats } from "@/modules/backups/service";
 import { getCareStats } from "@/modules/careops/stats";
 import { LEAD_STATUSES } from "@/modules/crm/lead-status";
 import { getCrmStats } from "@/modules/crm/stats";
@@ -41,6 +42,9 @@ export default async function DashboardPage({ params }: Props) {
   const database = await checkDatabase();
   const crm = can(session.actor.role, "crm:read") ? await getCrmStats(await actionContext()) : null;
   const care = await getCareStats(await actionContext());
+  const backups = can(session.actor.role, "backup:read")
+    ? await getBackupStats(await actionContext())
+    : null;
   const showCare = care.tickets !== null || care.maintenance !== null || care.assets !== null;
   const crmIsEmpty =
     crm !== null &&
@@ -157,6 +161,45 @@ export default async function DashboardPage({ params }: Props) {
                 />
               ) : null}
             </dl>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {backups ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("backupsTitle")}</CardTitle>
+            <CardDescription>{t("backupsDescription")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {backups.policies === 0 ? (
+              <p className="text-sm text-muted-foreground">{t("backupsEmpty")}</p>
+            ) : (
+              <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4" data-testid="backup-stats">
+                <Stat
+                  label={t("backupPolicies")}
+                  value={format.number(backups.policies)}
+                  testId="stat-backup-policies"
+                />
+                <Stat
+                  label={t("backupsCritical")}
+                  value={format.number(backups.critical)}
+                  tone={backups.critical > 0 ? "danger" : undefined}
+                  testId="stat-backup-critical"
+                />
+                <Stat
+                  label={t("backupsWarning")}
+                  value={format.number(backups.warning)}
+                  testId="stat-backup-warning"
+                />
+                <Stat
+                  label={t("backupsNeverTested")}
+                  value={format.number(backups.neverTested)}
+                  tone={backups.neverTested > 0 ? "danger" : undefined}
+                  testId="stat-backup-never-tested"
+                />
+              </dl>
+            )}
           </CardContent>
         </Card>
       ) : null}

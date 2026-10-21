@@ -56,6 +56,8 @@ export default async function CustomerPage({ params }: Props) {
       href: `/maintenance?customerId=${id}`,
       label: tCare("contracts"),
     },
+    can(role, "backup:read") && { href: `/backups?customerId=${id}`, label: tCare("backups") },
+    can(role, "remote:read") && { href: `/remote?customerId=${id}`, label: tCare("remote") },
   ].filter((link): link is { href: string; label: string } => Boolean(link));
   const canWrite = can(role, "crm:write") && !archived;
   const dt = (d: Date) => format.dateTime(d, { dateStyle: "medium", timeStyle: "short" });

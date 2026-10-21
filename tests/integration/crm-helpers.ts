@@ -51,6 +51,23 @@ export async function deleteCustomers(ids: string[]): Promise<void> {
     await tx.$executeRawUnsafe(
       `ALTER TABLE "recommendation" ENABLE TRIGGER recommendation_no_update_delete`,
     );
+    // Backup records, restore drills and remote plans are history (triggers); lifted here only.
+    const backupGuards: [string, string][] = [
+      ["backup_record", "backup_record_no_update_delete"],
+      ["restore_test", "restore_test_no_update_delete"],
+      ["remote_access_plan", "remote_plan_guard"],
+    ];
+    for (const [table, trigger] of backupGuards) {
+      await tx.$executeRawUnsafe(`ALTER TABLE "${table}" DISABLE TRIGGER ${trigger}`);
+    }
+    const backupWhere = { customerId: { in: ids } };
+    await tx.backupRecord.deleteMany({ where: { policy: backupWhere } });
+    await tx.restoreTest.deleteMany({ where: { policy: backupWhere } });
+    await tx.backupPolicy.deleteMany({ where: backupWhere });
+    await tx.remoteAccessPlan.deleteMany({ where: backupWhere });
+    for (const [table, trigger] of backupGuards) {
+      await tx.$executeRawUnsafe(`ALTER TABLE "${table}" ENABLE TRIGGER ${trigger}`);
+    }
     // Care-ops records are history (triggers); the guards are lifted for this transaction only.
     const careGuards: [string, string][] = [
       ["service_report", "service_report_no_update_delete"],

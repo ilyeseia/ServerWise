@@ -42,6 +42,12 @@ export interface E2EFixture {
   assetId: string;
   /** A maintenance contract with one overdue visit ("ZZ E2E Overdue check"). */
   contractId: string;
+  /** A backup policy with a recent backup that was never restored. */
+  policyId: string;
+  /** Draft remote access plans: compliant, and two with a gap (no explanation written). */
+  planOkId: string;
+  planGapAId: string;
+  planGapBId: string;
 }
 
 /** Where the seed writes each role's signed-in browser state. */

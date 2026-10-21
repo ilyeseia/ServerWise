@@ -104,6 +104,23 @@ async function main() {
       await tx.$executeRawUnsafe(
         `ALTER TABLE "recommendation" ENABLE TRIGGER recommendation_no_update_delete`,
       );
+      // Backup records, restore drills and remote plans are history (triggers); lifted here only.
+      const backupGuards: [string, string][] = [
+        ["backup_record", "backup_record_no_update_delete"],
+        ["restore_test", "restore_test_no_update_delete"],
+        ["remote_access_plan", "remote_plan_guard"],
+      ];
+      for (const [table, trigger] of backupGuards) {
+        await tx.$executeRawUnsafe(`ALTER TABLE "${table}" DISABLE TRIGGER ${trigger}`);
+      }
+      const backupWhere = { customerId: { in: ids } };
+      await tx.backupRecord.deleteMany({ where: { policy: backupWhere } });
+      await tx.restoreTest.deleteMany({ where: { policy: backupWhere } });
+      await tx.backupPolicy.deleteMany({ where: backupWhere });
+      await tx.remoteAccessPlan.deleteMany({ where: backupWhere });
+      for (const [table, trigger] of backupGuards) {
+        await tx.$executeRawUnsafe(`ALTER TABLE "${table}" ENABLE TRIGGER ${trigger}`);
+      }
       // Care-ops records are history (triggers); the guards are lifted for this transaction only.
       const careGuards: [string, string][] = [
         ["service_report", "service_report_no_update_delete"],
@@ -461,6 +478,40 @@ async function main() {
         assigneeId: users.technician!.id,
       });
 
+      // Backups: a policy with a recent backup that was never restored, and three draft remote
+      // access plans (one compliant, two that depart from the security policy).
+      const backups = await import("@/modules/backups/service");
+      const fixturePolicy = await backups.createPolicy(technicianCtx, {
+        customerId: customer.id,
+        name: `${E2E_DATA_PREFIX} Fixture nightly`,
+        kind: "database",
+        frequencyDays: 1,
+        destination: "External disk in the office safe",
+        encrypted: true,
+        encryptionKeyRef: "Customer password manager, item 31",
+      });
+      await backups.recordBackup(technicianCtx, fixturePolicy.id, {
+        ranAt: new Date(),
+        outcome: "success",
+        sizeMb: 512,
+      });
+      const plan = (title: string, over: Record<string, unknown> = {}) =>
+        backups.createPlan(technicianCtx, {
+          customerId: customer.id,
+          title: `${E2E_DATA_PREFIX} ${title}`,
+          tailnetOwner: "customer",
+          devices: "Office NAS, technician laptop",
+          deviceApproval: true,
+          keyExpiry: true,
+          noPublicExposure: true,
+          noSubnetOrExit: true,
+          mfa: true,
+          ...over,
+        });
+      const okPlan = await plan("Compliant plan");
+      const gapPlanA = await plan("Gap plan A", { mfa: false });
+      const gapPlanB = await plan("Gap plan B", { noPublicExposure: false });
+
       process.stdout.write(`E2E_USERS=${JSON.stringify(users)}\n`);
       process.stdout.write(
         `E2E_FIXTURE=${JSON.stringify({
@@ -476,6 +527,10 @@ async function main() {
           projectId: fixtureProject.id,
           assetId: fixtureAsset.id,
           contractId: fixtureContract.id,
+          policyId: fixturePolicy.id,
+          planOkId: okPlan.id,
+          planGapAId: gapPlanA.id,
+          planGapBId: gapPlanB.id,
         })}\n`,
       );
     } else if (command === "teardown") {

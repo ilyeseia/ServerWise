@@ -82,6 +82,14 @@ export const AUDIT_ACTIONS = [
   "ticket.updated",
   "ticket.status_changed",
   "ticket.commented",
+  "backuppolicy.created",
+  "backuppolicy.updated",
+  "backuprecord.recorded",
+  "restoretest.recorded",
+  "remoteplan.created",
+  "remoteplan.updated",
+  "remoteplan.approved",
+  "remoteplan.retired",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

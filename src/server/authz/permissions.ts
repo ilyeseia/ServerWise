@@ -49,6 +49,16 @@ export const PERMISSIONS = [
   "maintenance:write",
   /** Record the visits actually performed. */
   "maintenance:perform",
+  // Backups and remote-access planning (Stage 8).
+  "backup:read",
+  /** Policies and recovery documentation. */
+  "backup:write",
+  /** Record backup runs and restore drills. */
+  "backup:record",
+  "remote:read",
+  "remote:write",
+  /** Approve a remote access plan. Owner only: it is the check on what staff propose. */
+  "remote:approve",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -73,6 +83,8 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "ticket:write",
     "maintenance:read",
     "maintenance:write",
+    "backup:read",
+    "remote:read",
   ],
   technician: [
     "dashboard:view",
@@ -89,6 +101,11 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "ticket:write",
     "maintenance:read",
     "maintenance:perform",
+    "backup:read",
+    "backup:write",
+    "backup:record",
+    "remote:read",
+    "remote:write",
   ],
   viewer: ["dashboard:view"],
 };

@@ -94,6 +94,8 @@
 
 **Stage 7 notes:** no new dependencies. The job runner chosen in Stage 0 (a Compose `worker` on a timer, no external queue) is now implemented: it reuses the `migrate` image target (full source + `tsx`), polls every `REMINDER_INTERVAL_MINUTES` (default 60) and relies on a database unique key instead of locks for idempotency. Due dates are computed, not stored, so a schedule can never disagree with its last visit. Calendar arithmetic is done in UTC on whole days. Lesson recorded in CLAUDE.md: a server component that imports a constant from a `"use client"` module gets a reference object, not the value — keep shared values in plain modules.
 
+**Stage 8 notes:** no new dependencies. Backup health is derived (a backup is trusted only once a restore has been proven), not entered. Ordering of same-day entries uses `createdAt` as the tie-break - found by an end-to-end test where a failed drill entered after a successful one on the same day was hidden. The documented dump/restore commands were executed against a real instance (42 tables, 26 triggers and all migrations reproduced) before being written down; the application deliberately does not run backups itself.
+
 ### 2.6 Authorization — own RBAC matrix
 
 - Roles → permissions mapped in code, enforced in the **server** data-access layer; UI hiding is cosmetic only. CASL (`@casl/ability` 7.0.2) is evaluated in Stage 2; adopted only if attribute-level rules (e.g. "technician sees only assigned projects") get complex.

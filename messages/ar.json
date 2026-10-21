@@ -44,7 +44,9 @@
     "projects": "المشاريع",
     "assets": "الأصول",
     "tickets": "التذاكر",
-    "maintenance": "الصيانة"
+    "maintenance": "الصيانة",
+    "backups": "النسخ الاحتياطي",
+    "remote": "الوصول عن بُعد"
   },
   "Roles": {
     "owner": "مالك",
@@ -81,7 +83,14 @@
     "urgentTickets": "تذاكر عاجلة أو عالية الأولوية",
     "overdueMaintenance": "زيارات صيانة متأخرة",
     "dueSoonMaintenance": "زيارات صيانة قريبة",
-    "warrantyExpiring": "ضمانات تنتهي خلال 30 يومًا"
+    "warrantyExpiring": "ضمانات تنتهي خلال 30 يومًا",
+    "backupsTitle": "النسخ الاحتياطي",
+    "backupsDescription": "نسخة لم تُجرَّب استعادتها ليست ضمانًا. الأرقام محسوبة من السجلات الفعلية.",
+    "backupsEmpty": "لا توجد سياسات نسخ احتياطي بعد.",
+    "backupPolicies": "سياسات نشطة",
+    "backupsCritical": "حرجة (نسخ أو استعادة فاشلة)",
+    "backupsWarning": "تحتاج متابعة",
+    "backupsNeverTested": "لم تُجرَّب استعادتها"
   },
   "Auth": {
     "loginTitle": "تسجيل الدخول",
@@ -263,7 +272,15 @@
       "ticket_created": "فتح تذكرة",
       "ticket_updated": "تعديل تذكرة",
       "ticket_status_changed": "تغيير حالة تذكرة",
-      "ticket_commented": "تعليق على تذكرة"
+      "ticket_commented": "تعليق على تذكرة",
+      "backuppolicy_created": "إنشاء سياسة نسخ احتياطي",
+      "backuppolicy_updated": "تعديل سياسة نسخ احتياطي",
+      "backuprecord_recorded": "تسجيل تشغيل نسخ احتياطي",
+      "restoretest_recorded": "تسجيل اختبار استعادة",
+      "remoteplan_created": "إنشاء خطة وصول عن بُعد",
+      "remoteplan_updated": "تعديل خطة وصول عن بُعد",
+      "remoteplan_approved": "اعتماد خطة وصول عن بُعد",
+      "remoteplan_retired": "إيقاف خطة وصول عن بُعد"
     }
   },
   "Settings": {
@@ -537,7 +554,13 @@
       "CONTRACT_CANCELLED": "عقد الصيانة ملغى ولا يمكن تعديله.",
       "CONTRACT_CUSTOMER_FIXED": "لا يمكن نقل العقد إلى عميل آخر.",
       "CUSTOMER_REQUIRED": "اربط الزيارة بعميل أو جدول أو تذكرة أو أصل.",
-      "CUSTOMER_MISMATCH": "الروابط المختارة تنتمي إلى عملاء مختلفين."
+      "CUSTOMER_MISMATCH": "الروابط المختارة تنتمي إلى عملاء مختلفين.",
+      "POLICY_CUSTOMER_FIXED": "لا يمكن نقل السياسة إلى عميل آخر.",
+      "POLICY_INACTIVE": "السياسة متوقفة. فعّلها قبل تسجيل نسخ أو اختبارات.",
+      "RECOVERY_MISSING": "اكتب خطوات الاسترداد أولًا.",
+      "PLAN_LOCKED": "لا يمكن تعديل هذه الخطة. الخطة المعتمدة تُوقَف ثم تُستبدل بخطة جديدة.",
+      "PLAN_CUSTOMER_FIXED": "لا يمكن نقل الخطة إلى عميل آخر.",
+      "GAPS_NOT_EXPLAINED": "الخطة تخالف سياسة الأمان. اشرح كل مخالفة كتابةً قبل الاعتماد."
     }
   },
   "Requirements": {
@@ -1201,7 +1224,9 @@
     "title": "الخدمة والصيانة",
     "assets": "أصول العميل",
     "tickets": "تذاكر الدعم",
-    "contracts": "عقود الصيانة"
+    "contracts": "عقود الصيانة",
+    "backups": "سياسات النسخ الاحتياطي",
+    "remote": "خطط الوصول عن بُعد"
   },
   "Assets": {
     "title": "الأصول",
@@ -1374,6 +1399,153 @@
       "due_soon": "قريبة",
       "upcoming": "قادمة",
       "finished": "متوقفة"
+    }
+  },
+  "Backups": {
+    "title": "النسخ الاحتياطي",
+    "subtitle": "سياسات النسخ لدى العملاء وسجل تشغيلها واختبارات الاستعادة. النظام يسجّل ما حدث ولا يُشغّل نسخًا ولا يتصل بأنظمة العملاء.",
+    "empty": "لا توجد سياسات بعد.",
+    "noMatches": "لا توجد سياسات بهذه الحالة.",
+    "listTable": "قائمة سياسات النسخ الاحتياطي",
+    "newPolicy": "سياسة جديدة",
+    "editPolicy": "تعديل السياسة",
+    "all": "الكل",
+    "customer": "العميل",
+    "chooseCustomer": "اختر العميل…",
+    "asset": "الأصل المشمول",
+    "noAsset": "بدون أصل محدد",
+    "name": "الاسم",
+    "kindLabel": "نوع البيانات",
+    "frequencyDays": "كل (أيام)",
+    "frequencyHint": "أقصى فاصل متوقع بين نسختين ناجحتين.",
+    "retentionDays": "مدة الاحتفاظ (أيام)",
+    "destination": "الوجهة",
+    "destinationHint": "صفها بالكلمات (مثل: قرص خارجي في خزنة المكتب). لا تكتب كلمات مرور.",
+    "encrypted": "مشفّرة؟",
+    "offsite": "نسخة خارج الموقع؟",
+    "unknown": "غير معروف",
+    "yes": "نعم",
+    "no": "لا",
+    "restoreEveryDays": "اختبار الاستعادة كل (أيام)",
+    "restoreEveryHint": "أقصى مدة مقبولة دون إثبات أن الاستعادة تعمل.",
+    "keyRef": "مكان حفظ مفتاح التشفير",
+    "keyRefHint": "اكتب مكان حفظه فقط. لا تكتب المفتاح نفسه.",
+    "notes": "ملاحظات",
+    "active": "السياسة نشطة",
+    "healthLabel": "الصحة",
+    "backupLabel": "النسخ",
+    "restoreLabel": "الاستعادة",
+    "lastSuccess": "آخر نسخة ناجحة",
+    "lastRestore": "آخر استعادة ناجحة",
+    "nextExpected": "النسخة القادمة المتوقعة",
+    "never": "لم يحدث",
+    "details": "التفاصيل",
+    "neverTestedNotice": "لم تُجرَّب استعادة هذه النسخ بعد. حتى تُثبت الاستعادة لا تُعدّ السياسة سليمة.",
+    "restoreFailedNotice": "فشل آخر اختبار استعادة. عالج المشكلة ثم أعد الاختبار.",
+    "backupFailedNotice": "فشل آخر تشغيل للنسخ الاحتياطي.",
+    "inactiveNotice": "السياسة متوقفة ولا تُحسب في الصحة.",
+    "recovery": "وثيقة الاسترداد",
+    "recoveryProcedure": "خطوات الاسترداد",
+    "recoveryHint": "خطوات واضحة يستطيع غيرك تنفيذها في أسوأ الأحوال. راجعها مرة في السنة.",
+    "saveRecovery": "حفظ الوثيقة",
+    "markReviewed": "راجعتُ الوثيقة وهي سليمة",
+    "reviewedOn": "آخر مراجعة: {date}",
+    "backupRuns": "تشغيل النسخ الاحتياطي",
+    "noRuns": "لا توجد عمليات مسجلة.",
+    "runsTable": "سجل النسخ الاحتياطي",
+    "recordBackup": "تسجيل نسخة",
+    "ranAt": "تاريخ النسخ",
+    "sizeMb": "الحجم (ميغابايت)",
+    "outcomeLabel": "النتيجة",
+    "restoreTests": "اختبارات الاستعادة",
+    "noRestoreTests": "لم يُسجَّل أي اختبار استعادة.",
+    "restoreTable": "سجل اختبارات الاستعادة",
+    "recordRestore": "تسجيل اختبار استعادة",
+    "testedAt": "تاريخ الاختبار",
+    "durationMinutes": "المدة (دقائق)",
+    "drillHint": "اكتب أين استُعيدت النسخة وما الذي تم التحقق منه.",
+    "kind": {
+      "files": "ملفات",
+      "database": "قاعدة بيانات",
+      "system_image": "صورة نظام",
+      "configuration": "إعدادات",
+      "other": "أخرى"
+    },
+    "health": {
+      "critical": "حرجة",
+      "warning": "تحتاج متابعة",
+      "ok": "سليمة",
+      "inactive": "متوقفة"
+    },
+    "backupStatus": {
+      "ok": "منتظمة",
+      "partial": "جزئية",
+      "overdue": "متأخرة",
+      "failed": "فاشلة",
+      "inactive": "متوقفة"
+    },
+    "restoreStatus": {
+      "ok": "مثبتة",
+      "never_tested": "لم تُجرَّب",
+      "failed": "فاشلة",
+      "overdue": "تحتاج إعادة اختبار"
+    },
+    "docState": {
+      "ok": "محدّثة",
+      "stale": "تحتاج مراجعة",
+      "missing": "غير مكتوبة"
+    },
+    "outcome": {
+      "success": "نجحت",
+      "partial": "جزئية",
+      "failed": "فشلت"
+    }
+  },
+  "Remote": {
+    "title": "الوصول عن بُعد",
+    "subtitle": "خطط Tailscale لكل عميل: الأجهزة وقواعد الوصول وضمانات الأمان، مع اعتماد المالك.",
+    "documentationOnly": "هذه وثائق تخطيط فقط. النظام لا يغيّر شبكات العملاء ولا يحفظ مفاتيح Tailscale.",
+    "empty": "لا توجد خطط بعد.",
+    "listTable": "قائمة خطط الوصول عن بُعد",
+    "newPlan": "خطة جديدة",
+    "customer": "العميل",
+    "chooseCustomer": "اختر العميل…",
+    "titleLabel": "العنوان",
+    "statusLabel": "الحالة",
+    "tailnetOwner": "مالك الشبكة (tailnet)",
+    "tailnetOwnerHint": "الأفضل أن تكون شبكة العميل نفسه، حتى لا يعتمد وصولك على حسابك.",
+    "devices": "الأجهزة المتصلة",
+    "aclNotes": "قواعد الوصول (ACL) المقترحة",
+    "aclHint": "صف الوسوم ومن يصل إلى ماذا، بأقل صلاحية ممكنة.",
+    "safeguards": "ضمانات الأمان",
+    "exceptions": "تبرير المخالفات",
+    "exceptionsHint": "اتركه فارغًا إن كانت الخطة تلتزم بكل الضمانات.",
+    "exceptionsNeeded": "الخطة تخالف السياسة: اكتب هنا سبب كل مخالفة ليمكن اعتمادها.",
+    "gapsLabel": "عدد المخالفات",
+    "gapsTitle": "مخالفات سياسة الأمان",
+    "createdAt": "تاريخ الإنشاء",
+    "planDetails": "تفاصيل الخطة",
+    "approvedOn": "اعتُمدت في {date}",
+    "retiredOn": "أُوقفت في {date}",
+    "lockedNotice": "هذه الخطة لا تُعدَّل. للتغيير أوقفها وأنشئ خطة جديدة.",
+    "approve": "اعتماد الخطة",
+    "retire": "إيقاف الخطة",
+    "cannotApproveYet": "اشرح مخالفات الخطة كتابةً ثم احفظها قبل الاعتماد.",
+    "owner": {
+      "customer": "العميل",
+      "provider": "مزوّد الخدمة (نحن)"
+    },
+    "status": {
+      "draft": "مسودة",
+      "approved": "معتمدة",
+      "retired": "موقوفة"
+    },
+    "safeguard": {
+      "deviceApproval": "الموافقة اليدوية على كل جهاز جديد",
+      "keyExpiry": "انتهاء صلاحية المفاتيح مفعّل",
+      "noPublicExposure": "لا تعريض عام للإنترنت (بدون Funnel)",
+      "noSubnetOrExit": "لا موجّه شبكة فرعية ولا عقدة خروج",
+      "mfa": "مصادقة متعددة العوامل للحسابات"
     }
   }
 }

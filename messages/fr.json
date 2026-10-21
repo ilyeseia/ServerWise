@@ -44,7 +44,9 @@
     "projects": "Projets",
     "assets": "Équipements",
     "tickets": "Tickets",
-    "maintenance": "Maintenance"
+    "maintenance": "Maintenance",
+    "backups": "Sauvegardes",
+    "remote": "Accès à distance"
   },
   "Roles": {
     "owner": "Propriétaire",
@@ -81,7 +83,14 @@
     "urgentTickets": "Tickets urgents ou prioritaires",
     "overdueMaintenance": "Visites de maintenance en retard",
     "dueSoonMaintenance": "Visites de maintenance proches",
-    "warrantyExpiring": "Garanties expirant sous 30 jours"
+    "warrantyExpiring": "Garanties expirant sous 30 jours",
+    "backupsTitle": "Sauvegardes",
+    "backupsDescription": "Une sauvegarde jamais restaurée n'est pas une garantie. Chiffres calculés à partir des enregistrements réels.",
+    "backupsEmpty": "Aucune politique de sauvegarde pour le moment.",
+    "backupPolicies": "Politiques actives",
+    "backupsCritical": "Critiques (sauvegarde ou restauration en échec)",
+    "backupsWarning": "À surveiller",
+    "backupsNeverTested": "Restauration jamais testée"
   },
   "Auth": {
     "loginTitle": "Connexion",
@@ -263,7 +272,15 @@
       "ticket_created": "Ouverture d'un ticket",
       "ticket_updated": "Modification d'un ticket",
       "ticket_status_changed": "Changement de statut d'un ticket",
-      "ticket_commented": "Commentaire sur un ticket"
+      "ticket_commented": "Commentaire sur un ticket",
+      "backuppolicy_created": "Création d'une politique de sauvegarde",
+      "backuppolicy_updated": "Modification d'une politique de sauvegarde",
+      "backuprecord_recorded": "Enregistrement d'une exécution de sauvegarde",
+      "restoretest_recorded": "Enregistrement d'un test de restauration",
+      "remoteplan_created": "Création d'un plan d'accès à distance",
+      "remoteplan_updated": "Modification d'un plan d'accès à distance",
+      "remoteplan_approved": "Approbation d'un plan d'accès à distance",
+      "remoteplan_retired": "Retrait d'un plan d'accès à distance"
     }
   },
   "Settings": {
@@ -537,7 +554,13 @@
       "CONTRACT_CANCELLED": "Le contrat de maintenance est annulé et ne peut plus être modifié.",
       "CONTRACT_CUSTOMER_FIXED": "Un contrat ne peut pas changer de client.",
       "CUSTOMER_REQUIRED": "Rattachez la visite à un client, un planning, un ticket ou un équipement.",
-      "CUSTOMER_MISMATCH": "Les éléments choisis appartiennent à des clients différents."
+      "CUSTOMER_MISMATCH": "Les éléments choisis appartiennent à des clients différents.",
+      "POLICY_CUSTOMER_FIXED": "Une politique ne peut pas changer de client.",
+      "POLICY_INACTIVE": "La politique est désactivée. Réactivez-la avant d'enregistrer sauvegardes ou tests.",
+      "RECOVERY_MISSING": "Rédigez d'abord les étapes de restauration.",
+      "PLAN_LOCKED": "Ce plan ne peut plus être modifié. Un plan approuvé se retire puis se remplace par un nouveau plan.",
+      "PLAN_CUSTOMER_FIXED": "Un plan ne peut pas changer de client.",
+      "GAPS_NOT_EXPLAINED": "Le plan s'écarte de la politique de sécurité. Expliquez chaque écart par écrit avant l'approbation."
     }
   },
   "Requirements": {
@@ -1201,7 +1224,9 @@
     "title": "Service et maintenance",
     "assets": "Équipements du client",
     "tickets": "Tickets de support",
-    "contracts": "Contrats de maintenance"
+    "contracts": "Contrats de maintenance",
+    "backups": "Politiques de sauvegarde",
+    "remote": "Plans d'accès à distance"
   },
   "Assets": {
     "title": "Équipements",
@@ -1374,6 +1399,153 @@
       "due_soon": "Proche",
       "upcoming": "À venir",
       "finished": "Arrêté"
+    }
+  },
+  "Backups": {
+    "title": "Sauvegardes",
+    "subtitle": "Politiques de sauvegarde des clients, journal des exécutions et tests de restauration. Le système enregistre ce qui s'est passé ; il ne lance aucune sauvegarde et ne se connecte pas aux systèmes des clients.",
+    "empty": "Aucune politique pour le moment.",
+    "noMatches": "Aucune politique avec cet état.",
+    "listTable": "Liste des politiques de sauvegarde",
+    "newPolicy": "Nouvelle politique",
+    "editPolicy": "Modifier la politique",
+    "all": "Toutes",
+    "customer": "Client",
+    "chooseCustomer": "Choisir le client…",
+    "asset": "Équipement concerné",
+    "noAsset": "Aucun équipement précis",
+    "name": "Nom",
+    "kindLabel": "Type de données",
+    "frequencyDays": "Tous les (jours)",
+    "frequencyHint": "Intervalle maximal attendu entre deux sauvegardes réussies.",
+    "retentionDays": "Durée de conservation (jours)",
+    "destination": "Destination",
+    "destinationHint": "Décrivez-la en mots (par ex. disque externe dans le coffre du bureau). N'écrivez pas de mot de passe.",
+    "encrypted": "Chiffrée ?",
+    "offsite": "Copie hors site ?",
+    "unknown": "Inconnu",
+    "yes": "Oui",
+    "no": "Non",
+    "restoreEveryDays": "Test de restauration tous les (jours)",
+    "restoreEveryHint": "Durée maximale acceptable sans preuve que la restauration fonctionne.",
+    "keyRef": "Où est conservée la clé de chiffrement",
+    "keyRefHint": "Indiquez seulement où elle est conservée, jamais la clé elle-même.",
+    "notes": "Notes",
+    "active": "Politique active",
+    "healthLabel": "Santé",
+    "backupLabel": "Sauvegardes",
+    "restoreLabel": "Restauration",
+    "lastSuccess": "Dernière sauvegarde réussie",
+    "lastRestore": "Dernière restauration réussie",
+    "nextExpected": "Prochaine sauvegarde attendue",
+    "never": "Jamais",
+    "details": "Détails",
+    "neverTestedNotice": "La restauration de ces sauvegardes n'a jamais été testée. Tant qu'elle n'est pas prouvée, la politique n'est pas considérée comme saine.",
+    "restoreFailedNotice": "Le dernier test de restauration a échoué. Corrigez le problème puis refaites le test.",
+    "backupFailedNotice": "La dernière exécution de sauvegarde a échoué.",
+    "inactiveNotice": "La politique est désactivée et n'entre pas dans le calcul de santé.",
+    "recovery": "Procédure de restauration",
+    "recoveryProcedure": "Étapes de restauration",
+    "recoveryHint": "Des étapes claires qu'une autre personne peut suivre dans le pire des cas. À relire une fois par an.",
+    "saveRecovery": "Enregistrer la procédure",
+    "markReviewed": "J'ai relu la procédure, elle est à jour",
+    "reviewedOn": "Dernière relecture : {date}",
+    "backupRuns": "Exécutions de sauvegarde",
+    "noRuns": "Aucune exécution enregistrée.",
+    "runsTable": "Journal des sauvegardes",
+    "recordBackup": "Enregistrer une sauvegarde",
+    "ranAt": "Date de la sauvegarde",
+    "sizeMb": "Taille (Mo)",
+    "outcomeLabel": "Résultat",
+    "restoreTests": "Tests de restauration",
+    "noRestoreTests": "Aucun test de restauration enregistré.",
+    "restoreTable": "Journal des tests de restauration",
+    "recordRestore": "Enregistrer un test de restauration",
+    "testedAt": "Date du test",
+    "durationMinutes": "Durée (minutes)",
+    "drillHint": "Indiquez où la sauvegarde a été restaurée et ce qui a été vérifié.",
+    "kind": {
+      "files": "Fichiers",
+      "database": "Base de données",
+      "system_image": "Image système",
+      "configuration": "Configuration",
+      "other": "Autre"
+    },
+    "health": {
+      "critical": "Critique",
+      "warning": "À surveiller",
+      "ok": "Saine",
+      "inactive": "Désactivée"
+    },
+    "backupStatus": {
+      "ok": "Régulières",
+      "partial": "Partielle",
+      "overdue": "En retard",
+      "failed": "En échec",
+      "inactive": "Désactivée"
+    },
+    "restoreStatus": {
+      "ok": "Prouvée",
+      "never_tested": "Jamais testée",
+      "failed": "En échec",
+      "overdue": "À retester"
+    },
+    "docState": {
+      "ok": "À jour",
+      "stale": "À relire",
+      "missing": "Non rédigée"
+    },
+    "outcome": {
+      "success": "Réussie",
+      "partial": "Partielle",
+      "failed": "Échouée"
+    }
+  },
+  "Remote": {
+    "title": "Accès à distance",
+    "subtitle": "Plans Tailscale par client : appareils, règles d'accès et garanties de sécurité, avec approbation du propriétaire.",
+    "documentationOnly": "Documents de planification uniquement. Le système ne modifie pas les réseaux des clients et ne conserve aucune clé Tailscale.",
+    "empty": "Aucun plan pour le moment.",
+    "listTable": "Liste des plans d'accès à distance",
+    "newPlan": "Nouveau plan",
+    "customer": "Client",
+    "chooseCustomer": "Choisir le client…",
+    "titleLabel": "Titre",
+    "statusLabel": "Statut",
+    "tailnetOwner": "Propriétaire du réseau (tailnet)",
+    "tailnetOwnerHint": "Idéalement celui du client, pour que votre accès ne dépende pas de votre compte.",
+    "devices": "Appareils connectés",
+    "aclNotes": "Règles d'accès (ACL) proposées",
+    "aclHint": "Décrivez les étiquettes et qui accède à quoi, avec le minimum de droits.",
+    "safeguards": "Garanties de sécurité",
+    "exceptions": "Justification des écarts",
+    "exceptionsHint": "Laissez vide si le plan respecte toutes les garanties.",
+    "exceptionsNeeded": "Le plan s'écarte de la politique : écrivez ici la raison de chaque écart pour pouvoir l'approuver.",
+    "gapsLabel": "Écarts",
+    "gapsTitle": "Écarts avec la politique de sécurité",
+    "createdAt": "Créé le",
+    "planDetails": "Détails du plan",
+    "approvedOn": "Approuvé le {date}",
+    "retiredOn": "Retiré le {date}",
+    "lockedNotice": "Ce plan n'est plus modifiable. Pour le changer, retirez-le et créez un nouveau plan.",
+    "approve": "Approuver le plan",
+    "retire": "Retirer le plan",
+    "cannotApproveYet": "Expliquez les écarts du plan par écrit et enregistrez-le avant l'approbation.",
+    "owner": {
+      "customer": "Le client",
+      "provider": "Le prestataire (nous)"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "approved": "Approuvé",
+      "retired": "Retiré"
+    },
+    "safeguard": {
+      "deviceApproval": "Approbation manuelle de chaque nouvel appareil",
+      "keyExpiry": "Expiration des clés activée",
+      "noPublicExposure": "Aucune exposition publique (pas de Funnel)",
+      "noSubnetOrExit": "Ni routeur de sous-réseau ni nœud de sortie",
+      "mfa": "Authentification multifacteur sur les comptes"
     }
   }
 }

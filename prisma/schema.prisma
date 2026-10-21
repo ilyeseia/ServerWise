@@ -247,6 +247,8 @@ model Customer {
   contracts      MaintenanceContract[]
   tickets        Ticket[]
   serviceReports ServiceReport[]
+  backupPolicies BackupPolicy[]
+  remotePlans    RemoteAccessPlan[]
   communications Communication[]
 
   @@index([name])
@@ -855,6 +857,7 @@ model Asset {
   project        Project?        @relation(fields: [projectId], references: [id], onDelete: SetNull)
   product        Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
   contracts      ContractAsset[]
+  backupPolicies BackupPolicy[]
   tickets        Ticket[]
   serviceReports ServiceReport[]
 
@@ -1006,4 +1009,141 @@ model TicketComment {
 
   @@index([ticketId, createdAt])
   @@map("ticket_comment")
+}
+
+enum BackupKind {
+  files
+  database
+  system_image
+  configuration
+  other
+}
+
+enum BackupOutcome {
+  success
+  partial
+  failed
+}
+
+enum RestoreOutcome {
+  success
+  failed
+}
+
+enum RemotePlanStatus {
+  draft
+  approved
+  retired
+}
+
+enum TailnetOwner {
+  customer
+  provider
+}
+
+/// How a customer's data is backed up. The application records the policy and what happened; it
+/// never runs a backup or touches a customer system. Secrets are NEVER stored: `encryptionKeyRef`
+/// only says where the key is kept.
+model BackupPolicy {
+  id                   String     @id @default(uuid(7))
+  customerId           String
+  assetId              String?
+  name                 String     @db.VarChar(200)
+  kind                 BackupKind
+  /// A successful backup is expected at least every this many days.
+  frequencyDays        Int
+  retentionDays        Int?
+  /// Where the copies go, in words (for example "external disk kept in the office safe").
+  destination          String     @db.VarChar(300)
+  /// null = not known yet.
+  encrypted            Boolean?
+  /// Where the encryption key is kept, never the key.
+  encryptionKeyRef     String?    @db.VarChar(300)
+  offsite              Boolean?
+  /// A restore must be proven at least this often (FR-9).
+  restoreTestEveryDays Int        @default(90)
+  /// Step-by-step recovery documentation.
+  recoveryProcedure    String?    @db.VarChar(4000)
+  recoveryReviewedAt   DateTime?  @db.Timestamptz(3)
+  active               Boolean    @default(true)
+  notes                String?    @db.VarChar(1000)
+  createdById          String?
+  createdAt            DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt            DateTime   @default(now()) @updatedAt @db.Timestamptz(3)
+
+  customer     Customer       @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  asset        Asset?         @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  records      BackupRecord[]
+  restoreTests RestoreTest[]
+
+  @@index([customerId])
+  @@index([active])
+  @@map("backup_policy")
+}
+
+/// One backup run, as reported by the person who checked it. Append-only.
+model BackupRecord {
+  id           String        @id @default(uuid(7))
+  policyId     String
+  ranAt        DateTime      @db.Timestamptz(3)
+  outcome      BackupOutcome
+  sizeMb       Int?
+  notes        String?       @db.VarChar(1000)
+  recordedById String?
+  createdAt    DateTime      @default(now()) @db.Timestamptz(3)
+
+  policy BackupPolicy @relation(fields: [policyId], references: [id], onDelete: Restrict)
+
+  @@index([policyId, ranAt(sort: Desc)])
+  @@map("backup_record")
+}
+
+/// A restore drill: proof that a backup can actually be restored. Append-only.
+model RestoreTest {
+  id              String         @id @default(uuid(7))
+  policyId        String
+  testedAt        DateTime       @db.Timestamptz(3)
+  outcome         RestoreOutcome
+  durationMinutes Int?
+  notes           String?        @db.VarChar(1000)
+  testedById      String?
+  createdAt       DateTime       @default(now()) @db.Timestamptz(3)
+
+  policy BackupPolicy @relation(fields: [policyId], references: [id], onDelete: Restrict)
+
+  @@index([policyId, testedAt(sort: Desc)])
+  @@map("restore_test")
+}
+
+/// A Tailscale access plan for a customer: documentation and approval only. The application never
+/// changes a customer's network or holds an auth key.
+model RemoteAccessPlan {
+  id               String           @id @default(uuid(7))
+  customerId       String
+  title            String           @db.VarChar(200)
+  status           RemotePlanStatus @default(draft)
+  tailnetOwner     TailnetOwner     @default(customer)
+  /// Which devices connect, in words.
+  devices          String?          @db.VarChar(2000)
+  /// Proposed ACL / tag layout, in words.
+  aclNotes         String?          @db.VarChar(4000)
+  deviceApproval   Boolean          @default(false)
+  keyExpiry        Boolean          @default(false)
+  noPublicExposure Boolean          @default(false)
+  noSubnetOrExit   Boolean          @default(false)
+  mfa              Boolean          @default(false)
+  /// Required to approve a plan that departs from the security policy.
+  exceptions       String?          @db.VarChar(2000)
+  approvedAt       DateTime?        @db.Timestamptz(3)
+  approvedById     String?
+  retiredAt        DateTime?        @db.Timestamptz(3)
+  createdById      String?
+  createdAt        DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime         @default(now()) @updatedAt @db.Timestamptz(3)
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  @@index([customerId])
+  @@index([status])
+  @@map("remote_access_plan")
 }
