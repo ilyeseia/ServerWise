@@ -90,6 +90,8 @@
 
 **Stage 5 notes:** adds `decimal.js` 10.6.0 (MIT) for exact money arithmetic; the calculator is pure and shared by server and editor preview. **Quotation documents:** printed from an HTML page built from the issued snapshot using the browser's _Save as PDF_, because the browser performs correct Arabic shaping and RTL. Rejected for now: drawing PDFs with a JavaScript library (Arabic joining/RTL unreliable and unverified here) and server-side headless Chromium (adds a browser to the production image). **Open decision for the owner:** if automatic PDF files (for e-mail or archive) are required, approve adding headless Chromium to the image, or choose a hosted renderer.
 
+**Stage 6 notes:** no new dependencies. Owner decision recorded: quotation documents are printed from the browser (_Save as PDF_); no headless Chromium in the image. Project and task rules are pure functions in `rules.ts` with the structural ones repeated as CHECKs and triggers; dependency cycles are detected with a recursive query. Task titles generated from the template are stored in the creator's language (they are editable content), while every screen string exists in ar and fr.
+
 ### 2.6 Authorization — own RBAC matrix
 
 - Roles → permissions mapped in code, enforced in the **server** data-access layer; UI hiding is cosmetic only. CASL (`@casl/ability` 7.0.2) is evaluated in Stage 2; adopted only if attribute-level rules (e.g. "technician sees only assigned projects") get complex.

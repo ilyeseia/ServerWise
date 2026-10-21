@@ -36,6 +36,8 @@ export interface E2EFixture {
   productBId: string;
   productCId: string;
   supplierId: string;
+  /** A planned project (from an accepted quotation) on the fixture lead. */
+  projectId: string;
 }
 
 /** Where the seed writes each role's signed-in browser state. */

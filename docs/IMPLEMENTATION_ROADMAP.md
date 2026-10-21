@@ -26,8 +26,9 @@ Workflow for **every** stage: explain (Arabic) → implement → verify (lint, t
 | 2     | Approved and published (authentication, RBAC, audit log, settings) |
 | 3     | Approved and published (CRM, requirements questionnaire)           |
 | 4     | Approved and published (`bb87359`; catalog, suppliers, advisor)    |
-| 5     | Implemented, pending approval (quotations)                         |
-| 6–11  | Not started                                                        |
+| 5     | Approved and published (`3aa41ce`; quotations)                     |
+| 6     | Implemented, pending approval (ProjectFlow)                        |
+| 7–11  | Not started                                                        |
 
 ## Cross-cutting each stage
 

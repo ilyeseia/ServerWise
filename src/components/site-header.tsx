@@ -19,6 +19,7 @@ type NavKey =
   | "catalog"
   | "suppliers"
   | "quotes"
+  | "projects"
   | "users"
   | "audit"
   | "settings";
@@ -32,6 +33,7 @@ const NAV: {
     | "/catalog"
     | "/suppliers"
     | "/quotes"
+    | "/projects"
     | "/users"
     | "/audit"
     | "/settings";
@@ -45,6 +47,7 @@ const NAV: {
   { href: "/catalog", key: "catalog", permission: "catalog:read" },
   { href: "/suppliers", key: "suppliers", permission: "catalog:read" },
   { href: "/quotes", key: "quotes", permission: "quote:read" },
+  { href: "/projects", key: "projects", permission: "project:read" },
   { href: "/users", key: "users", permission: "user:read" },
   { href: "/audit", key: "audit", permission: "audit:read" },
   { href: "/settings", key: "settings", permission: "settings:read" },

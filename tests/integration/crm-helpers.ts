@@ -51,6 +51,26 @@ export async function deleteCustomers(ids: string[]): Promise<void> {
     await tx.$executeRawUnsafe(
       `ALTER TABLE "recommendation" ENABLE TRIGGER recommendation_no_update_delete`,
     );
+    // Projects are history (triggers); the guards are lifted for this transaction only.
+    const projectGuards: [string, string][] = [
+      ["project", "project_guard"],
+      ["task", "task_guard"],
+      ["milestone", "milestone_guard"],
+      ["checklist_item", "checklist_guard"],
+      ["task_dependency", "task_dependency_guard"],
+    ];
+    for (const [table, trigger] of projectGuards) {
+      await tx.$executeRawUnsafe(`ALTER TABLE "${table}" DISABLE TRIGGER ${trigger}`);
+    }
+    const projectWhere = { lead: { customerId: { in: ids } } };
+    await tx.checklistItem.deleteMany({ where: { task: { project: projectWhere } } });
+    await tx.taskDependency.deleteMany({ where: { task: { project: projectWhere } } });
+    await tx.task.deleteMany({ where: { project: projectWhere } });
+    await tx.milestone.deleteMany({ where: { project: projectWhere } });
+    await tx.project.deleteMany({ where: projectWhere });
+    for (const [table, trigger] of projectGuards) {
+      await tx.$executeRawUnsafe(`ALTER TABLE "${table}" ENABLE TRIGGER ${trigger}`);
+    }
     // Issued quotations are immutable snapshots; the guards are lifted for this transaction only.
     for (const trigger of ["quote_line_guard", "quote_revision_guard"]) {
       const table = trigger === "quote_line_guard" ? "quote_line" : "quote_revision";

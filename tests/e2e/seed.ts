@@ -104,6 +104,26 @@ async function main() {
       await tx.$executeRawUnsafe(
         `ALTER TABLE "recommendation" ENABLE TRIGGER recommendation_no_update_delete`,
       );
+      // Projects are history (triggers); the guards are lifted for this transaction only.
+      const projectGuards: [string, string][] = [
+        ["project", "project_guard"],
+        ["task", "task_guard"],
+        ["milestone", "milestone_guard"],
+        ["checklist_item", "checklist_guard"],
+        ["task_dependency", "task_dependency_guard"],
+      ];
+      for (const [table, trigger] of projectGuards) {
+        await tx.$executeRawUnsafe(`ALTER TABLE "${table}" DISABLE TRIGGER ${trigger}`);
+      }
+      const projectWhere = { lead: { customerId: { in: ids } } };
+      await tx.checklistItem.deleteMany({ where: { task: { project: projectWhere } } });
+      await tx.taskDependency.deleteMany({ where: { task: { project: projectWhere } } });
+      await tx.task.deleteMany({ where: { project: projectWhere } });
+      await tx.milestone.deleteMany({ where: { project: projectWhere } });
+      await tx.project.deleteMany({ where: projectWhere });
+      for (const [table, trigger] of projectGuards) {
+        await tx.$executeRawUnsafe(`ALTER TABLE "${table}" ENABLE TRIGGER ${trigger}`);
+      }
       // Issued quotations are immutable snapshots; the guards are lifted for this transaction only.
       await tx.$executeRawUnsafe(`ALTER TABLE "quote_line" DISABLE TRIGGER quote_line_guard`);
       await tx.$executeRawUnsafe(
@@ -359,6 +379,30 @@ async function main() {
         });
       }
 
+      // A project on the fixture lead (accepted quotation -> project), for read-only checks.
+      const quotes = await import("@/modules/quotes/service");
+      const projects = await import("@/modules/projects/service");
+      const salesCtx = {
+        actor: {
+          id: users.sales!.id,
+          email: users.sales!.email,
+          name: "E2E sales",
+          role: "sales" as const,
+        },
+      };
+      const quote = await quotes.createQuote(salesCtx, {
+        leadId: lead.id,
+        title: `${E2E_DATA_PREFIX} Fixture quote`,
+      });
+      await quotes.saveDraft(salesCtx, quote.revisionId, {
+        lines: [
+          { kind: "service", description: "Fixture service", quantity: "1", unitPrice: "1000" },
+        ],
+      });
+      await quotes.issueRevision(salesCtx, quote.revisionId);
+      await quotes.decideRevision(salesCtx, quote.revisionId, { decision: "accepted" });
+      const fixtureProject = await projects.createProjectFromQuote(salesCtx, quote.id, "ar");
+
       process.stdout.write(`E2E_USERS=${JSON.stringify(users)}\n`);
       process.stdout.write(
         `E2E_FIXTURE=${JSON.stringify({
@@ -371,6 +415,7 @@ async function main() {
           productBId: weak.id,
           productCId: noPrice.id,
           supplierId: supplier.id,
+          projectId: fixtureProject.id,
         })}\n`,
       );
     } else if (command === "teardown") {

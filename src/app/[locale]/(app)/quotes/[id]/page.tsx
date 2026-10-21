@@ -11,10 +11,12 @@ import { formatLocaleTag } from "@/i18n/routing";
 import { listProducts } from "@/modules/catalog/products";
 import { formatMoney } from "@/modules/quotes/format";
 import { readPricing } from "@/modules/quotes/pricing";
+import { findProjectForQuote } from "@/modules/projects/service";
 import { getQuote } from "@/modules/quotes/service";
 import { actionContext } from "@/server/actions";
 import { orNotFound, requirePagePermission } from "@/server/auth/page-guard";
 import { can } from "@/server/authz/permissions";
+import { CreateProject } from "./create-project";
 import { QuoteEditor, type EditorLine } from "./quote-editor";
 import { RevisionControls } from "./revision-controls";
 
@@ -38,6 +40,7 @@ export default async function QuotePage({ params, searchParams }: Props) {
   const selected = quote.revisions.find((r) => String(r.number) === rev) ?? quote.revisions[0]!;
   const latest = quote.revisions[0]!;
 
+  const tp = await getTranslations("Projects");
   const [t, tKind, format] = await Promise.all([
     getTranslations("Quotes"),
     getTranslations("Quotes.kind"),
@@ -57,6 +60,10 @@ export default async function QuotePage({ params, searchParams }: Props) {
         label: `${p.brand} ${p.model}`,
       }))
     : [];
+
+  const acceptedRevision = quote.revisions.find((r) => r.storedStatus === "accepted");
+  const project =
+    acceptedRevision && can(role, "project:read") ? await findProjectForQuote(ctx, id) : null;
 
   const isLatest = selected.id === latest.id;
   const canDecide =
@@ -231,6 +238,23 @@ export default async function QuotePage({ params, searchParams }: Props) {
           )}
         </CardContent>
       </Card>
+
+      {acceptedRevision && (project || can(role, "project:manage")) ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{tp("title")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {project ? (
+              <Link href={`/projects/${project.id}`} className="text-primary hover:underline">
+                {tp("openProject", { number: project.number })}
+              </Link>
+            ) : (
+              <CreateProject quoteId={id} />
+            )}
+          </CardContent>
+        </Card>
+      ) : null}
 
       {!isDraft && (canDecide || canRevise) ? (
         <Card>

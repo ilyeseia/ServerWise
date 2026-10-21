@@ -3,7 +3,7 @@
 **Smarter Servers. Better Decisions.**
 AI-Powered Server & Infrastructure Management — a platform for running a server installation, infrastructure deployment and IT maintenance business in Algeria (Sétif and surrounding regions).
 
-> **Status: Stage 5 — quotations (SmartQuote).** Deterministic quotations with immutable issued snapshots, revisions, owner-configured pricing and a print-ready ar/fr document sit on top of Stage 4's catalog and advisor, Stage 3's CRM and Stage 2's authentication, roles and audit log. Projects and the other modules arrive in later stages. See the roadmap below, [QUOTING](docs/QUOTING.md) and [ADVISOR_SCORING](docs/ADVISOR_SCORING.md).
+> **Status: Stage 6 — project execution (ProjectFlow).** An accepted quotation becomes a project (created once, idempotently) with tasks, checklists, milestones, dependencies, a mandatory rollback plan and a recorded handover. It sits on top of Stage 5's deterministic quotations, Stage 4's catalog and advisor, Stage 3's CRM and Stage 2's authentication, roles and audit log. Inventory, maintenance and the other modules arrive in later stages. See the roadmap below, [PROJECTS](docs/PROJECTS.md), [QUOTING](docs/QUOTING.md) and [ADVISOR_SCORING](docs/ADVISOR_SCORING.md).
 
 ## الملخص بالعربية
 

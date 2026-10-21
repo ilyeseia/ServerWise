@@ -32,6 +32,12 @@ export const PERMISSIONS = [
   "quote:issue",
   /** Record the customer's answer (accepted / rejected) on an issued revision. */
   "quote:decide",
+  // Projects (Stage 6).
+  "project:read",
+  /** Day-to-day work: tasks, checklists, milestones, dependencies. */
+  "project:write",
+  /** Create a project from a quotation, change its status, plan and hand it over. */
+  "project:manage",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -48,6 +54,9 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "quote:write",
     "quote:issue",
     "quote:decide",
+    "project:read",
+    "project:write",
+    "project:manage",
   ],
   technician: [
     "dashboard:view",
@@ -56,6 +65,8 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "catalog:read",
     "catalog:write",
     "quote:read",
+    "project:read",
+    "project:write",
   ],
   viewer: ["dashboard:view"],
 };

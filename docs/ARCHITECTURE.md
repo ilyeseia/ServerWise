@@ -70,6 +70,14 @@ Conventions: UUIDv7/cuid ids, `createdAt/updatedAt`, soft-delete only where hist
 - Pricing configuration (`AppSetting` key `pricing`, owner only) holds the validity, the allowed tax rates, markup, minimum margin and labour rate; nothing has a built-in value.
 - Permissions `quote:read|write|issue|decide`; the customer-facing print page never shows costs or sources.
 
+**Implemented in Stage 6 (`src/modules/projects`; rules in [PROJECTS](PROJECTS.md)):**
+
+- Tables `project`, `milestone`, `task`, `task_dependency`, `checklist_item`, `project_counter`. A project belongs to exactly one quotation (`quoteId` is unique), so creating it twice returns the same project; the database also refuses a project whose quotation has no accepted revision.
+- State machines are explicit and pure (`rules.ts`): project `planned → in_progress ⇄ on_hold → completed`, with `cancelled` from any open state; task `todo / in_progress / blocked / done / cancelled`. The service applies them, and triggers repeat the project transitions.
+- A project cannot start without a written rollback plan, cannot complete before every task is done or cancelled and a handover is recorded, and a cancelled project keeps its reason. Tasks cannot start or finish before their prerequisites; a task is not done while its checklist has unchecked items.
+- Dependencies are checked for cycles in code and again by a trigger (recursive query); completed and cancelled projects freeze their tasks, checklists, milestones and dependencies.
+- Initial tasks (survey, rollback plan, one per quotation line, test, handover) come from a deterministic template in the creator's language.
+
 ## 5. Key flows
 
 - **Enquiry → quote:** Lead → questionnaire → advisor ranks products using fresh verified offers → quote draft → review → issue (snapshot) → accept → project.

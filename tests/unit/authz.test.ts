@@ -32,6 +32,9 @@ const EXPECTED: Record<Role, Record<Permission, boolean>> = {
     "quote:write": true,
     "quote:issue": true,
     "quote:decide": true,
+    "project:read": true,
+    "project:write": true,
+    "project:manage": true,
   },
   sales: {
     "dashboard:view": true,
@@ -50,6 +53,9 @@ const EXPECTED: Record<Role, Record<Permission, boolean>> = {
     "quote:write": true,
     "quote:issue": true,
     "quote:decide": true,
+    "project:read": true,
+    "project:write": true,
+    "project:manage": true,
   },
   technician: {
     "dashboard:view": true,
@@ -68,6 +74,9 @@ const EXPECTED: Record<Role, Record<Permission, boolean>> = {
     "quote:write": false,
     "quote:issue": false,
     "quote:decide": false,
+    "project:read": true,
+    "project:write": true,
+    "project:manage": false,
   },
   viewer: {
     "dashboard:view": true,
@@ -86,6 +95,9 @@ const EXPECTED: Record<Role, Record<Permission, boolean>> = {
     "quote:write": false,
     "quote:issue": false,
     "quote:decide": false,
+    "project:read": false,
+    "project:write": false,
+    "project:manage": false,
   },
 };
 
