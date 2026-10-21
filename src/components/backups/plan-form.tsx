@@ -37,7 +37,8 @@ export function PlanForm({ planId, initial, customers, customerLocked, readOnly 
   const set = <K extends keyof PlanFormValues>(key: K, value: PlanFormValues[K]) =>
     setV((current) => ({ ...current, [key]: value }));
   const departs =
-    v.tailnetOwner !== "customer" || SAFEGUARDS.some((s) => !v[s as Safeguard & keyof PlanFormValues]);
+    v.tailnetOwner !== "customer" ||
+    SAFEGUARDS.some((s) => !v[s as Safeguard & keyof PlanFormValues]);
 
   return (
     <form

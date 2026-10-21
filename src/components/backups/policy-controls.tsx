@@ -100,7 +100,14 @@ export function RecordBackup({ policyId }: { policyId: string }) {
       {action.error ? <Alert variant="danger">{action.error}</Alert> : null}
       <div className="grid gap-3 sm:grid-cols-3">
         <Field id="run-date" label={t("ranAt")}>
-          <Input id="run-date" type="date" dir="ltr" required value={ranAt} onChange={(e) => setRanAt(e.target.value)} />
+          <Input
+            id="run-date"
+            type="date"
+            dir="ltr"
+            required
+            value={ranAt}
+            onChange={(e) => setRanAt(e.target.value)}
+          />
         </Field>
         <Field id="run-outcome" label={t("outcomeLabel")}>
           <Select
@@ -116,11 +123,22 @@ export function RecordBackup({ policyId }: { policyId: string }) {
           </Select>
         </Field>
         <Field id="run-size" label={t("sizeMb")}>
-          <Input id="run-size" dir="ltr" inputMode="numeric" value={sizeMb} onChange={(e) => setSizeMb(e.target.value)} />
+          <Input
+            id="run-size"
+            dir="ltr"
+            inputMode="numeric"
+            value={sizeMb}
+            onChange={(e) => setSizeMb(e.target.value)}
+          />
         </Field>
       </div>
       <Field id="run-notes" label={t("notes")}>
-        <Input id="run-notes" maxLength={1000} value={notes} onChange={(e) => setNotes(e.target.value)} />
+        <Input
+          id="run-notes"
+          maxLength={1000}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+        />
       </Field>
       <div>
         <Button type="submit" variant="outline" disabled={action.pending || !ranAt}>
@@ -164,7 +182,14 @@ export function RecordRestoreTest({ policyId }: { policyId: string }) {
       {action.error ? <Alert variant="danger">{action.error}</Alert> : null}
       <div className="grid gap-3 sm:grid-cols-3">
         <Field id="drill-date" label={t("testedAt")}>
-          <Input id="drill-date" type="date" dir="ltr" required value={testedAt} onChange={(e) => setTestedAt(e.target.value)} />
+          <Input
+            id="drill-date"
+            type="date"
+            dir="ltr"
+            required
+            value={testedAt}
+            onChange={(e) => setTestedAt(e.target.value)}
+          />
         </Field>
         <Field id="drill-outcome" label={t("outcomeLabel")}>
           <Select
@@ -180,11 +205,22 @@ export function RecordRestoreTest({ policyId }: { policyId: string }) {
           </Select>
         </Field>
         <Field id="drill-duration" label={t("durationMinutes")}>
-          <Input id="drill-duration" dir="ltr" inputMode="numeric" value={duration} onChange={(e) => setDuration(e.target.value)} />
+          <Input
+            id="drill-duration"
+            dir="ltr"
+            inputMode="numeric"
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+          />
         </Field>
       </div>
       <Field id="drill-notes" label={t("notes")} hint={t("drillHint")}>
-        <Input id="drill-notes" maxLength={1000} value={notes} onChange={(e) => setNotes(e.target.value)} />
+        <Input
+          id="drill-notes"
+          maxLength={1000}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+        />
       </Field>
       <div>
         <Button type="submit" variant="outline" disabled={action.pending || !testedAt}>

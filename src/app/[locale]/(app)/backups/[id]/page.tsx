@@ -45,13 +45,28 @@ export default async function PolicyPage({ params }: Props) {
 
   const facts: [string, React.ReactNode][] = [
     [t("kindLabel"), tKind(policy.kind as "files")],
-    [t("frequencyDays"), <span key="f" dir="ltr">{policy.frequencyDays}</span>],
-    [t("retentionDays"), <span key="r" dir="ltr">{policy.retentionDays ?? t("unknown")}</span>],
+    [
+      t("frequencyDays"),
+      <span key="f" dir="ltr">
+        {policy.frequencyDays}
+      </span>,
+    ],
+    [
+      t("retentionDays"),
+      <span key="r" dir="ltr">
+        {policy.retentionDays ?? t("unknown")}
+      </span>,
+    ],
     [t("destination"), policy.destination],
     [t("encrypted"), yesNo(policy.encrypted)],
     [t("offsite"), yesNo(policy.offsite)],
     [t("keyRef"), policy.encryptionKeyRef ?? t("unknown")],
-    [t("restoreEveryDays"), <span key="e" dir="ltr">{policy.restoreTestEveryDays}</span>],
+    [
+      t("restoreEveryDays"),
+      <span key="e" dir="ltr">
+        {policy.restoreTestEveryDays}
+      </span>,
+    ],
     [t("lastSuccess"), day(policy.lastSuccessAt)],
     [t("nextExpected"), policy.nextExpected ? day(policy.nextExpected) : "—"],
     [t("lastRestore"), day(policy.lastRestoreSuccessAt)],
@@ -93,8 +108,12 @@ export default async function PolicyPage({ params }: Props) {
       {policy.restore === "never_tested" && policy.active ? (
         <Alert>{t("neverTestedNotice")}</Alert>
       ) : null}
-      {policy.restore === "failed" ? <Alert variant="danger">{t("restoreFailedNotice")}</Alert> : null}
-      {policy.backup === "failed" ? <Alert variant="danger">{t("backupFailedNotice")}</Alert> : null}
+      {policy.restore === "failed" ? (
+        <Alert variant="danger">{t("restoreFailedNotice")}</Alert>
+      ) : null}
+      {policy.backup === "failed" ? (
+        <Alert variant="danger">{t("backupFailedNotice")}</Alert>
+      ) : null}
       {!policy.active ? <Alert>{t("inactiveNotice")}</Alert> : null}
 
       <Card>
@@ -196,7 +215,9 @@ export default async function PolicyPage({ params }: Props) {
                     <Td>
                       <OutcomeBadge outcome={r.outcome} />
                     </Td>
-                    <Td dir="ltr">{r.durationMinutes === null ? "—" : format.number(r.durationMinutes)}</Td>
+                    <Td dir="ltr">
+                      {r.durationMinutes === null ? "—" : format.number(r.durationMinutes)}
+                    </Td>
                     <Td>{r.notes ?? ""}</Td>
                   </tr>
                 ))}

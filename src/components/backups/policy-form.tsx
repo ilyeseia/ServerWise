@@ -2,10 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import {
-  createPolicyAction,
-  updatePolicyAction,
-} from "@/app/[locale]/(app)/backup-actions";
+import { createPolicyAction, updatePolicyAction } from "@/app/[locale]/(app)/backup-actions";
 import { useAction } from "@/components/projects/use-action";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -76,7 +73,11 @@ export function PolicyForm({
           </Select>
         </Field>
         <Field id="policy-asset" label={t("asset")}>
-          <Select id="policy-asset" value={v.assetId} onChange={(e) => set("assetId", e.target.value)}>
+          <Select
+            id="policy-asset"
+            value={v.assetId}
+            onChange={(e) => set("assetId", e.target.value)}
+          >
             <option value="">{t("noAsset")}</option>
             {assets.map((a) => (
               <option key={a.id} value={a.id}>
@@ -151,7 +152,11 @@ export function PolicyForm({
           </Select>
         </Field>
         <Field id="policy-offsite" label={t("offsite")}>
-          <Select id="policy-offsite" value={v.offsite} onChange={(e) => set("offsite", e.target.value)}>
+          <Select
+            id="policy-offsite"
+            value={v.offsite}
+            onChange={(e) => set("offsite", e.target.value)}
+          >
             <option value="">{t("unknown")}</option>
             <option value="true">{t("yes")}</option>
             <option value="false">{t("no")}</option>
@@ -177,10 +182,19 @@ export function PolicyForm({
         />
       </Field>
       <Field id="policy-notes" label={t("notes")}>
-        <Textarea id="policy-notes" maxLength={1000} value={v.notes} onChange={(e) => set("notes", e.target.value)} />
+        <Textarea
+          id="policy-notes"
+          maxLength={1000}
+          value={v.notes}
+          onChange={(e) => set("notes", e.target.value)}
+        />
       </Field>
       <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" checked={v.active} onChange={(e) => set("active", e.target.checked)} />
+        <input
+          type="checkbox"
+          checked={v.active}
+          onChange={(e) => set("active", e.target.checked)}
+        />
         {t("active")}
       </label>
       <div>

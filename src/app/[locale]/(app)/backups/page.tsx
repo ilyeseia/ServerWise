@@ -1,9 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import {
-  BackupStatusBadge,
-  HealthBadge,
-  RestoreStatusBadge,
-} from "@/components/backups/badges";
+import { BackupStatusBadge, HealthBadge, RestoreStatusBadge } from "@/components/backups/badges";
 import { Pagination } from "@/components/crm/pagination";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Select } from "@/components/ui/input";
@@ -102,7 +98,10 @@ export default async function BackupsPage({ params, searchParams }: Props) {
               {result.items.map((p) => (
                 <tr key={p.id}>
                   <Td>
-                    <Link href={`/backups/${p.id}`} className="font-medium text-primary hover:underline">
+                    <Link
+                      href={`/backups/${p.id}`}
+                      className="font-medium text-primary hover:underline"
+                    >
                       {p.name}
                     </Link>
                   </Td>

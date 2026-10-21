@@ -205,7 +205,13 @@ export async function getPolicy(ctx: CrmContext, id: string, now = new Date()) {
     ...health,
     records: newestFirst(policy.records, (r) => r.ranAt)
       .slice(0, 30)
-      .map((r) => ({ id: r.id, ranAt: r.ranAt, outcome: r.outcome, sizeMb: r.sizeMb, notes: r.notes })),
+      .map((r) => ({
+        id: r.id,
+        ranAt: r.ranAt,
+        outcome: r.outcome,
+        sizeMb: r.sizeMb,
+        notes: r.notes,
+      })),
     restoreTests: newestFirst(policy.restoreTests, (t) => t.testedAt)
       .slice(0, 30)
       .map((t) => ({
@@ -257,7 +263,10 @@ async function checkPolicyReferences(tx: Tx, data: ReturnType<typeof backupPolic
     const asset = await tx.asset.findUnique({ where: { id: data.assetId } });
     if (!asset) throw notFound("Asset");
     if (asset.customerId !== data.customerId) {
-      throw new RuleViolationError("ASSET_CUSTOMER_MISMATCH", "The asset belongs to another customer");
+      throw new RuleViolationError(
+        "ASSET_CUSTOMER_MISMATCH",
+        "The asset belongs to another customer",
+      );
     }
   }
 }
@@ -327,7 +336,8 @@ export async function updatePolicy(
       throw new RuleViolationError("POLICY_CUSTOMER_FIXED", "A policy cannot change customer");
     }
     await checkPolicyReferences(tx, data);
-    const procedureChanged = (data.recoveryProcedure ?? null) !== (policy.recoveryProcedure ?? null);
+    const procedureChanged =
+      (data.recoveryProcedure ?? null) !== (policy.recoveryProcedure ?? null);
     await tx.backupPolicy.update({
       where: { id },
       data: {
@@ -341,7 +351,14 @@ export async function updatePolicy(
       },
     });
     await tx.auditLog.create({
-      data: auditData(actor, "backuppolicy.updated", "backup_policy", id, { active: data.active }, ctx.client),
+      data: auditData(
+        actor,
+        "backuppolicy.updated",
+        "backup_policy",
+        id,
+        { active: data.active },
+        ctx.client,
+      ),
     });
     return { id };
   });
@@ -360,7 +377,14 @@ export async function markRecoveryReviewed(ctx: CrmContext, id: string, now = ne
     }
     await tx.backupPolicy.update({ where: { id }, data: { recoveryReviewedAt: now } });
     await tx.auditLog.create({
-      data: auditData(actor, "backuppolicy.updated", "backup_policy", id, { reviewed: true }, ctx.client),
+      data: auditData(
+        actor,
+        "backuppolicy.updated",
+        "backup_policy",
+        id,
+        { reviewed: true },
+        ctx.client,
+      ),
     });
     return { id };
   });
@@ -387,7 +411,14 @@ export async function saveRecoveryProcedure(
       data: { recoveryProcedure: text || null, recoveryReviewedAt: text ? now : null },
     });
     await tx.auditLog.create({
-      data: auditData(actor, "backuppolicy.updated", "backup_policy", id, { recovery: true }, ctx.client),
+      data: auditData(
+        actor,
+        "backuppolicy.updated",
+        "backup_policy",
+        id,
+        { recovery: true },
+        ctx.client,
+      ),
     });
     return { id };
   });
@@ -547,7 +578,11 @@ export async function listPlans(
       customerId: p.customerId,
       customerName: p.customer.name,
       tailnetOwner: p.tailnetOwner,
-      gaps: planGaps({ tailnetOwner: p.tailnetOwner, safeguards: planSafeguards(p), exceptions: p.exceptions }).length,
+      gaps: planGaps({
+        tailnetOwner: p.tailnetOwner,
+        safeguards: planSafeguards(p),
+        exceptions: p.exceptions,
+      }).length,
       createdAt: p.createdAt,
     })),
   };
@@ -603,7 +638,14 @@ export async function createPlan(ctx: CrmContext, input: RemotePlanInput) {
       data: { customerId: data.customerId, createdById: actor.id, ...planData(data) },
     });
     await tx.auditLog.create({
-      data: auditData(actor, "remoteplan.created", "remote_plan", plan.id, { customerId: data.customerId }, ctx.client),
+      data: auditData(
+        actor,
+        "remoteplan.created",
+        "remote_plan",
+        plan.id,
+        { customerId: data.customerId },
+        ctx.client,
+      ),
     });
     return { id: plan.id };
   });
@@ -658,7 +700,14 @@ export async function approvePlan(ctx: CrmContext, id: string, now = new Date())
       data: { status: "approved", approvedAt: now, approvedById: actor.id },
     });
     await tx.auditLog.create({
-      data: auditData(actor, "remoteplan.approved", "remote_plan", id, { gaps: approval.gaps.length }, ctx.client),
+      data: auditData(
+        actor,
+        "remoteplan.approved",
+        "remote_plan",
+        id,
+        { gaps: approval.gaps.length },
+        ctx.client,
+      ),
     });
     return { id };
   });
@@ -675,7 +724,10 @@ export async function retirePlan(ctx: CrmContext, id: string, now = new Date()) 
     if (plan.status === "retired") {
       throw new RuleViolationError("PLAN_LOCKED", "The plan is already retired");
     }
-    await tx.remoteAccessPlan.update({ where: { id }, data: { status: "retired", retiredAt: now } });
+    await tx.remoteAccessPlan.update({
+      where: { id },
+      data: { status: "retired", retiredAt: now },
+    });
     await tx.auditLog.create({
       data: auditData(actor, "remoteplan.retired", "remote_plan", id, {}, ctx.client),
     });
