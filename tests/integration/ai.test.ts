@@ -324,13 +324,22 @@ describe("AI gateway (integration)", () => {
         summary: attack,
       });
       const db = getDb();
-      const before = {
-        customers: await db.customer.count(),
-        quotes: await db.quote.count(),
-        revisions: await db.quoteRevision.count({ where: { status: "accepted" } }),
-        users: await db.user.findMany({ where: { id: sales.user.id }, select: { role: true } }),
-        audit: await db.auditLog.count(),
-      };
+      // Other test files run in parallel on the same database, so count only what these users own.
+      const staffIds = [owner, sales, technician, viewer].map((s) => s.user.id);
+      const snapshot = async () => ({
+        customers: await db.customer.count({ where: { createdById: { in: staffIds } } }),
+        quotes: await db.quote.count({ where: { createdById: { in: staffIds } } }),
+        accepted: await db.quoteRevision.count({
+          where: { status: "accepted", quote: { createdById: { in: staffIds } } },
+        }),
+        roles: await db.user.findMany({
+          where: { id: { in: staffIds } },
+          select: { id: true, role: true },
+          orderBy: { id: "asc" },
+        }),
+        audit: await db.auditLog.count({ where: { actorId: { in: staffIds } } }),
+      });
+      const before = await snapshot();
 
       // The model "obeys" the injected text and returns extra fields as a hostile reply would.
       const { provider, calls } = fakeProvider(
@@ -359,15 +368,8 @@ describe("AI gateway (integration)", () => {
       expect(sent.match(/<\/untrusted_data>/g)).toHaveLength(1);
       expect(sent).toContain("[tag removed]");
 
-      expect(await db.customer.count()).toBe(before.customers);
-      expect(await db.quote.count()).toBe(before.quotes);
-      expect(await db.quoteRevision.count({ where: { status: "accepted" } })).toBe(
-        before.revisions,
-      );
-      expect(
-        await db.user.findMany({ where: { id: sales.user.id }, select: { role: true } }),
-      ).toEqual(before.users);
-      expect(await db.auditLog.count()).toBe(before.audit);
+      // Nothing was created, accepted, re-roled or audited as a result of the hostile text.
+      expect(await snapshot()).toEqual(before);
     });
 
     it("scrubs credentials from the answer", async () => {
