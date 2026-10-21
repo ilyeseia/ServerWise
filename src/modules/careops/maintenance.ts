@@ -216,7 +216,12 @@ export async function listDueMaintenance(
   return collectDue(now, leadDays);
 }
 
-async function collectDue(now: Date, leadDays: number, scheduleIds?: string[]): Promise<DueItem[]> {
+/** Not permission-checked: callers (the dashboard, the reports) do their own check. */
+export async function collectDue(
+  now: Date,
+  leadDays: number,
+  scheduleIds?: string[],
+): Promise<DueItem[]> {
   const schedules = await getDb().maintenanceSchedule.findMany({
     where: {
       active: true,

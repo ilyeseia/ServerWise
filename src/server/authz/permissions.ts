@@ -61,6 +61,13 @@ export const PERMISSIONS = [
   "remote:approve",
   // The AI assistant (Stage 9). It only reads what the user may already read and writes text.
   "ai:use",
+  // Reports and analytics (Stage 10).
+  /** Aggregated figures: counts, rates and durations. */
+  "report:read",
+  /** Money figures (quotation values, monthly fees). Hidden from people who lack it. */
+  "report:financial",
+  /** Download a report as CSV. Every export is audited. */
+  "report:export",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -88,6 +95,9 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "backup:read",
     "remote:read",
     "ai:use",
+    "report:read",
+    "report:financial",
+    "report:export",
   ],
   technician: [
     "dashboard:view",
@@ -110,8 +120,10 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "remote:read",
     "remote:write",
     "ai:use",
+    "report:read",
   ],
-  viewer: ["dashboard:view"],
+  // The read-only "viewer / accountant" role: reports only, including the money figures.
+  viewer: ["dashboard:view", "report:read", "report:financial"],
 };
 
 export function isRole(value: unknown): value is Role {

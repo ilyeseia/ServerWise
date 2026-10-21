@@ -216,10 +216,10 @@ test.describe("sales (read-only settings)", () => {
 test.describe("viewer", () => {
   test.use({ storageState: authFile("viewer") });
 
-  test("only the dashboard is available", async ({ page }) => {
+  test("only the dashboard and the reports are available", async ({ page }) => {
     await page.goto("/fr/dashboard");
     const nav = page.getByRole("navigation", { name: "Navigation principale" });
-    await expect(nav.getByRole("link")).toHaveCount(1);
+    await expect(nav.getByRole("link")).toHaveCount(2);
     for (const path of ["/fr/users", "/fr/audit", "/fr/settings"]) {
       const response = await page.goto(path);
       expect(response?.status()).toBe(404);

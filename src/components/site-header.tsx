@@ -25,6 +25,7 @@ type NavKey =
   | "maintenance"
   | "backups"
   | "remote"
+  | "reports"
   | "users"
   | "audit"
   | "settings";
@@ -44,6 +45,7 @@ const NAV: {
     | "/maintenance"
     | "/backups"
     | "/remote"
+    | "/reports"
     | "/users"
     | "/audit"
     | "/settings";
@@ -63,6 +65,7 @@ const NAV: {
   { href: "/maintenance", key: "maintenance", permission: "maintenance:read" },
   { href: "/backups", key: "backups", permission: "backup:read" },
   { href: "/remote", key: "remote", permission: "remote:read" },
+  { href: "/reports", key: "reports", permission: "report:read" },
   { href: "/users", key: "users", permission: "user:read" },
   { href: "/audit", key: "audit", permission: "audit:read" },
   { href: "/settings", key: "settings", permission: "settings:read" },

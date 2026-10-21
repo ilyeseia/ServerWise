@@ -98,6 +98,8 @@
 
 **Stage 9 notes:** no new dependencies and no vendor SDK. Providers are small `fetch` clients (Anthropic Messages, OpenAI chat completions, and any OpenAI-compatible server), which keeps the dependency tree and the supply-chain surface unchanged and makes failures easy to map to typed codes. The model id is deliberately not defaulted: the owner chooses the provider, model and budget (the open decision from Stage 0). Requests are verified against a local stand-in server in unit tests and end-to-end tests; they have not been run against live services. Google Gemini is not implemented (the interface supports adding it).
 
+**Stage 10 notes:** no new dependencies and no chart library: the only graphic is a CSS bar next to an accessible table, which keeps the page light on Algerian bandwidth, works without JavaScript and is trivially accessible. Figures are computed on demand by indexed queries over the existing tables; if a report ever becomes slow the right answer is an index or a materialised view, decided with measurements in Stage 11, not a cache now. PDF reports are out of scope by the earlier decision (browser print). Viewer/accountant role: given reports only, money included, as the product requirements describe it.
+
 ### 2.6 Authorization — own RBAC matrix
 
 - Roles → permissions mapped in code, enforced in the **server** data-access layer; UI hiding is cosmetic only. CASL (`@casl/ability` 7.0.2) is evaluated in Stage 2; adopted only if attribute-level rules (e.g. "technician sees only assigned projects") get complex.

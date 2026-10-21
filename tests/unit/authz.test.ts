@@ -49,6 +49,9 @@ const EXPECTED: Record<Role, Record<Permission, boolean>> = {
     "remote:write": true,
     "remote:approve": true,
     "ai:use": true,
+    "report:read": true,
+    "report:financial": true,
+    "report:export": true,
   },
   sales: {
     "dashboard:view": true,
@@ -84,6 +87,9 @@ const EXPECTED: Record<Role, Record<Permission, boolean>> = {
     "remote:write": false,
     "remote:approve": false,
     "ai:use": true,
+    "report:read": true,
+    "report:financial": true,
+    "report:export": true,
   },
   technician: {
     "dashboard:view": true,
@@ -119,6 +125,9 @@ const EXPECTED: Record<Role, Record<Permission, boolean>> = {
     "remote:write": true,
     "remote:approve": false,
     "ai:use": true,
+    "report:read": true,
+    "report:financial": false,
+    "report:export": false,
   },
   viewer: {
     "dashboard:view": true,
@@ -154,6 +163,9 @@ const EXPECTED: Record<Role, Record<Permission, boolean>> = {
     "remote:write": false,
     "remote:approve": false,
     "ai:use": false,
+    "report:read": true,
+    "report:financial": true,
+    "report:export": false,
   },
 };
 

@@ -96,6 +96,12 @@ Conventions: UUIDv7/cuid ids, `createdAt/updatedAt`, soft-delete only where hist
 - One gateway (`runAiTool`) is the only way to reach a model: permission check (`ai:use` + the tool's own), input validation, risk gate (`read` / `draft` / `sensitive`), configuration and per-user daily allowance, data read through the normal services as the user, untrusted-data wrapping with personal data masked, a schema-validated JSON answer scrubbed of secrets, and a log line without content (`ai_request`, append-only).
 - Tools are read-only by construction (an import allow-list enforced by a test). The provider interface has three implementations over plain `fetch`; every failure becomes a typed `AiUnavailableError`/`AiInvalidError` without provider text. AI configuration is parsed independently from the application's environment, so an AI misconfiguration only disables the assistant.
 
+**Implemented in Stage 10 (`src/modules/reports`; see [REPORTS](REPORTS.md)):**
+
+- Reports are pure read-side aggregation over existing tables: no new tables, nothing cached or stored. Window-based figures use event dates (`closedAt`, `issuedAt`, `decidedAt`, `completedAt`, `resolvedAt`, `performedAt`); "current" figures ignore the period. Rates return `null` when their denominator is empty. Money is summed with `decimal.js` and only returned to holders of `report:financial`.
+- CSV export is a route handler (`GET /api/reports/export`) that applies the same session and access-gate rules as the pages, re-checks `report:export` in the service, writes a `report.exported` audit row and escapes cells that a spreadsheet would read as formulas.
+- The unguarded loaders reused from other modules (`collectDue`, `loadPolicyHealth`) are documented as "caller must check" and are only called after `report:read` is asserted.
+
 ## 5. Key flows
 
 - **Enquiry → quote:** Lead → questionnaire → advisor ranks products using fresh verified offers → quote draft → review → issue (snapshot) → accept → project.

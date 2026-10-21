@@ -125,15 +125,16 @@ export interface PolicyListItem extends PolicyHealth {
   active: boolean;
 }
 
-export async function listPolicies(
-  ctx: CrmContext,
-  query: { customerId?: string; health?: Health; page?: number; pageSize?: number } = {},
+/**
+ * Every policy with its computed health, problems first. NOT permission-checked: callers must do
+ * their own check (listPolicies requires backup:read, the reports require report:read).
+ */
+export async function loadPolicyHealth(
+  customerIds?: string[],
   now = new Date(),
-): Promise<Page<PolicyListItem>> {
-  assertCan(ctx.actor, "backup:read");
-  const { page, pageSize } = pageInput.parse({ page: query.page, pageSize: query.pageSize });
+): Promise<PolicyListItem[]> {
   const rows = await getDb().backupPolicy.findMany({
-    where: query.customerId ? { customerId: query.customerId } : {},
+    where: customerIds ? { customerId: { in: customerIds } } : {},
     include: {
       customer: { select: { id: true, name: true } },
       records: true,
@@ -141,28 +142,41 @@ export async function listPolicies(
     },
     take: 500,
   });
-  const items = rows
-    .map((policy): PolicyListItem => {
-      const health = computeHealth(policy, now);
-      return {
-        id: policy.id,
-        name: policy.name,
-        kind: policy.kind,
-        customerId: policy.customerId,
-        customerName: policy.customer.name,
-        frequencyDays: policy.frequencyDays,
-        active: policy.active,
-        ...health,
-      };
-    })
-    .filter((item) => !query.health || item.health === query.health)
-    // Problems first, then by customer and name, so the list is stable.
-    .sort(
-      (a, b) =>
-        HEALTH_RANK[a.health] - HEALTH_RANK[b.health] ||
-        a.customerName.localeCompare(b.customerName) ||
-        a.name.localeCompare(b.name),
-    );
+  return (
+    rows
+      .map((policy): PolicyListItem => {
+        const health = computeHealth(policy, now);
+        return {
+          id: policy.id,
+          name: policy.name,
+          kind: policy.kind,
+          customerId: policy.customerId,
+          customerName: policy.customer.name,
+          frequencyDays: policy.frequencyDays,
+          active: policy.active,
+          ...health,
+        };
+      })
+      // Problems first, then by customer and name, so the list is stable.
+      .sort(
+        (a, b) =>
+          HEALTH_RANK[a.health] - HEALTH_RANK[b.health] ||
+          a.customerName.localeCompare(b.customerName) ||
+          a.name.localeCompare(b.name),
+      )
+  );
+}
+
+export async function listPolicies(
+  ctx: CrmContext,
+  query: { customerId?: string; health?: Health; page?: number; pageSize?: number } = {},
+  now = new Date(),
+): Promise<Page<PolicyListItem>> {
+  assertCan(ctx.actor, "backup:read");
+  const { page, pageSize } = pageInput.parse({ page: query.page, pageSize: query.pageSize });
+  const items = (
+    await loadPolicyHealth(query.customerId ? [query.customerId] : undefined, now)
+  ).filter((item) => !query.health || item.health === query.health);
   return {
     total: items.length,
     page,

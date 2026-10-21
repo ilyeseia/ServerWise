@@ -46,7 +46,8 @@
     "tickets": "التذاكر",
     "maintenance": "الصيانة",
     "backups": "النسخ الاحتياطي",
-    "remote": "الوصول عن بُعد"
+    "remote": "الوصول عن بُعد",
+    "reports": "التقارير"
   },
   "Roles": {
     "owner": "مالك",
@@ -280,7 +281,8 @@
       "remoteplan_created": "إنشاء خطة وصول عن بُعد",
       "remoteplan_updated": "تعديل خطة وصول عن بُعد",
       "remoteplan_approved": "اعتماد خطة وصول عن بُعد",
-      "remoteplan_retired": "إيقاف خطة وصول عن بُعد"
+      "remoteplan_retired": "إيقاف خطة وصول عن بُعد",
+      "report_exported": "تصدير تقرير"
     }
   },
   "Settings": {
@@ -1591,5 +1593,117 @@
       "disabled_by_limit": "الحد اليومي مضبوط على صفر فالمساعد متوقف للجميع."
     },
     "settingsHelp": "يُضبط عبر متغيرات البيئة على الخادم (AI_PROVIDER وAI_API_KEY وAI_MODEL…). المفتاح لا يُخزَّن في قاعدة البيانات ولا يُعرض هنا."
+  },
+  "Reports": {
+    "title": "التحليلات والتقارير",
+    "subtitle": "أرقام محسوبة مباشرة من سجلاتك الفعلية. لا تقديرات ولا قيم تجميلية: حيث لا توجد بيانات تُكتب «لا توجد بيانات».",
+    "period": "الفترة",
+    "apply": "تطبيق",
+    "window": "الفترة المحسوبة: من {from} إلى {to}",
+    "noData": "لا توجد بيانات",
+    "hidden": "غير مسموح لك برؤية المبالغ",
+    "currency": "د.ج",
+    "range": {
+      "30d": "آخر 30 يومًا",
+      "90d": "آخر 90 يومًا",
+      "365d": "آخر سنة"
+    },
+    "sales": "المبيعات",
+    "salesHint": "الفرص تُحسب عند إغلاقها، والعروض عند إصدارها أو الرد عليها ضمن الفترة.",
+    "winRate": "نسبة الفوز",
+    "won": "فرص فازت",
+    "lost": "فرص خسرت",
+    "quotesIssued": "عروض أُصدرت",
+    "quotesAccepted": "عروض قُبلت",
+    "quotesRejected": "عروض رُفضت",
+    "acceptanceRate": "نسبة قبول العروض",
+    "issuedTotal": "قيمة العروض المُصدرة",
+    "acceptedTotal": "قيمة العروض المقبولة",
+    "averageAccepted": "متوسط العرض المقبول",
+    "funnel": "الفرص حسب المرحلة (الآن)",
+    "funnelTable": "عدد الفرص في كل مرحلة",
+    "stage": "المرحلة",
+    "count": "العدد",
+    "bar": "شريط",
+    "exportQuotes": "تصدير العروض (CSV)",
+    "operations": "التنفيذ",
+    "projectsCompleted": "مشاريع اكتملت",
+    "averageDuration": "متوسط مدة التنفيذ",
+    "days": "{value} يوم",
+    "openTasks": "مهام مفتوحة",
+    "overdueTasks": "مهام متأخرة",
+    "exportProjects": "تصدير المشاريع (CSV)",
+    "support": "الدعم",
+    "ticketsOpened": "تذاكر فُتحت",
+    "ticketsResolved": "تذاكر حُلّت",
+    "averageResolution": "متوسط زمن الحل",
+    "hours": "{value} ساعة",
+    "openPriority": "مفتوحة ({priority})",
+    "exportTickets": "تصدير التذاكر (CSV)",
+    "maintenance": "الصيانة",
+    "activeContracts": "عقود سارية",
+    "monthlyFees": "الرسوم الشهرية للعقود السارية",
+    "overdueVisits": "زيارات متأخرة",
+    "dueSoonVisits": "زيارات قريبة",
+    "visitsDone": "زيارات أُنجزت",
+    "exportMaintenance": "تصدير الزيارات المستحقة (CSV)",
+    "backups": "النسخ الاحتياطي",
+    "backupsHint": "نسخة لم تُجرَّب استعادتها لا تُحسب سليمة.",
+    "policies": "سياسات نشطة",
+    "healthy": "سليمة",
+    "needAttention": "تحتاج متابعة",
+    "critical": "حرجة",
+    "neverRestored": "لم تُجرَّب استعادتها",
+    "exportBackups": "تصدير السياسات (CSV)",
+    "csv": {
+      "quotes": {
+        "number": "رقم العرض",
+        "revision": "المراجعة",
+        "title": "العنوان",
+        "customer": "العميل",
+        "status": "الحالة",
+        "issuedAt": "تاريخ الإصدار",
+        "validUntil": "صالح حتى",
+        "total": "الإجمالي (د.ج)"
+      },
+      "tickets": {
+        "number": "الرقم",
+        "title": "العنوان",
+        "customer": "العميل",
+        "status": "الحالة",
+        "priority": "الأولوية",
+        "assignee": "المسؤول",
+        "openedAt": "تاريخ الفتح",
+        "resolvedAt": "تاريخ الحل"
+      },
+      "projects": {
+        "number": "الرقم",
+        "title": "العنوان",
+        "customer": "العميل",
+        "status": "الحالة",
+        "createdAt": "تاريخ الإنشاء",
+        "targetDate": "الموعد المستهدف",
+        "completedAt": "تاريخ الإكمال"
+      },
+      "maintenance": {
+        "schedule": "الزيارة",
+        "contract": "العقد",
+        "customer": "العميل",
+        "nextVisit": "الموعد",
+        "state": "الحالة",
+        "assignee": "المسؤول"
+      },
+      "backups": {
+        "policy": "السياسة",
+        "customer": "العميل",
+        "kind": "النوع",
+        "active": "نشطة",
+        "health": "الصحة",
+        "backup": "النسخ",
+        "restore": "الاستعادة",
+        "lastSuccess": "آخر نسخة ناجحة",
+        "lastRestoreSuccess": "آخر استعادة ناجحة"
+      }
+    }
   }
 }

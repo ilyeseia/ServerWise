@@ -46,7 +46,8 @@
     "tickets": "Tickets",
     "maintenance": "Maintenance",
     "backups": "Sauvegardes",
-    "remote": "Accès à distance"
+    "remote": "Accès à distance",
+    "reports": "Rapports"
   },
   "Roles": {
     "owner": "Propriétaire",
@@ -280,7 +281,8 @@
       "remoteplan_created": "Création d'un plan d'accès à distance",
       "remoteplan_updated": "Modification d'un plan d'accès à distance",
       "remoteplan_approved": "Approbation d'un plan d'accès à distance",
-      "remoteplan_retired": "Retrait d'un plan d'accès à distance"
+      "remoteplan_retired": "Retrait d'un plan d'accès à distance",
+      "report_exported": "Export d'un rapport"
     }
   },
   "Settings": {
@@ -1591,5 +1593,117 @@
       "disabled_by_limit": "La limite quotidienne est à zéro : l'assistant est désactivé pour tous."
     },
     "settingsHelp": "Se configure par variables d'environnement sur le serveur (AI_PROVIDER, AI_API_KEY, AI_MODEL…). La clé n'est pas stockée en base de données et n'est jamais affichée ici."
+  },
+  "Reports": {
+    "title": "Analyses et rapports",
+    "subtitle": "Chiffres calculés en direct à partir de vos enregistrements réels. Aucune estimation ni valeur décorative : sans données, on écrit « Aucune donnée ».",
+    "period": "Période",
+    "apply": "Appliquer",
+    "window": "Période calculée : du {from} au {to}",
+    "noData": "Aucune donnée",
+    "hidden": "Montants non autorisés pour votre rôle",
+    "currency": "DZD",
+    "range": {
+      "30d": "30 derniers jours",
+      "90d": "90 derniers jours",
+      "365d": "Dernière année"
+    },
+    "sales": "Ventes",
+    "salesHint": "Les opportunités comptent à leur clôture, les devis à leur émission ou à la réponse du client dans la période.",
+    "winRate": "Taux de gain",
+    "won": "Opportunités gagnées",
+    "lost": "Opportunités perdues",
+    "quotesIssued": "Devis émis",
+    "quotesAccepted": "Devis acceptés",
+    "quotesRejected": "Devis refusés",
+    "acceptanceRate": "Taux d'acceptation des devis",
+    "issuedTotal": "Valeur des devis émis",
+    "acceptedTotal": "Valeur des devis acceptés",
+    "averageAccepted": "Devis accepté moyen",
+    "funnel": "Opportunités par étape (actuel)",
+    "funnelTable": "Nombre d'opportunités par étape",
+    "stage": "Étape",
+    "count": "Nombre",
+    "bar": "Barre",
+    "exportQuotes": "Exporter les devis (CSV)",
+    "operations": "Exécution",
+    "projectsCompleted": "Projets terminés",
+    "averageDuration": "Durée moyenne d'exécution",
+    "days": "{value} jours",
+    "openTasks": "Tâches ouvertes",
+    "overdueTasks": "Tâches en retard",
+    "exportProjects": "Exporter les projets (CSV)",
+    "support": "Support",
+    "ticketsOpened": "Tickets ouverts",
+    "ticketsResolved": "Tickets résolus",
+    "averageResolution": "Délai moyen de résolution",
+    "hours": "{value} h",
+    "openPriority": "Ouverts ({priority})",
+    "exportTickets": "Exporter les tickets (CSV)",
+    "maintenance": "Maintenance",
+    "activeContracts": "Contrats en vigueur",
+    "monthlyFees": "Redevances mensuelles des contrats en vigueur",
+    "overdueVisits": "Visites en retard",
+    "dueSoonVisits": "Visites proches",
+    "visitsDone": "Visites effectuées",
+    "exportMaintenance": "Exporter les visites dues (CSV)",
+    "backups": "Sauvegardes",
+    "backupsHint": "Une sauvegarde jamais restaurée n'est pas comptée comme saine.",
+    "policies": "Politiques actives",
+    "healthy": "Saines",
+    "needAttention": "À surveiller",
+    "critical": "Critiques",
+    "neverRestored": "Restauration jamais testée",
+    "exportBackups": "Exporter les politiques (CSV)",
+    "csv": {
+      "quotes": {
+        "number": "Numéro",
+        "revision": "Révision",
+        "title": "Titre",
+        "customer": "Client",
+        "status": "Statut",
+        "issuedAt": "Date d'émission",
+        "validUntil": "Valable jusqu'au",
+        "total": "Total (DZD)"
+      },
+      "tickets": {
+        "number": "Numéro",
+        "title": "Titre",
+        "customer": "Client",
+        "status": "Statut",
+        "priority": "Priorité",
+        "assignee": "Responsable",
+        "openedAt": "Date d'ouverture",
+        "resolvedAt": "Date de résolution"
+      },
+      "projects": {
+        "number": "Numéro",
+        "title": "Titre",
+        "customer": "Client",
+        "status": "Statut",
+        "createdAt": "Date de création",
+        "targetDate": "Échéance visée",
+        "completedAt": "Date d'achèvement"
+      },
+      "maintenance": {
+        "schedule": "Visite",
+        "contract": "Contrat",
+        "customer": "Client",
+        "nextVisit": "Échéance",
+        "state": "État",
+        "assignee": "Responsable"
+      },
+      "backups": {
+        "policy": "Politique",
+        "customer": "Client",
+        "kind": "Type",
+        "active": "Active",
+        "health": "Santé",
+        "backup": "Sauvegardes",
+        "restore": "Restauration",
+        "lastSuccess": "Dernière sauvegarde réussie",
+        "lastRestoreSuccess": "Dernière restauration réussie"
+      }
+    }
   }
 }

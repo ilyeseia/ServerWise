@@ -90,6 +90,7 @@ export const AUDIT_ACTIONS = [
   "remoteplan.updated",
   "remoteplan.approved",
   "remoteplan.retired",
+  "report.exported",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
