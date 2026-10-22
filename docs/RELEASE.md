@@ -49,7 +49,8 @@ First installation only: copy `.env.example` to `.env`, set `POSTGRES_PASSWORD` 
 docker compose run --rm migrate pnpm owner:create --email you@example.com --name "Your Name"
 ```
 
-Public access goes through TLS only (Tailscale/tsdproxy, or a reverse proxy). `Strict-Transport-Security`
+The app listens on `127.0.0.1:3000` only. Public access goes through a TLS reverse proxy you run
+(Caddy, Nginx, ...) or an SSH tunnel; there is no proxy or Tailscale network wired into the compose file. `Strict-Transport-Security`
 is sent by the application; the database is never published.
 
 ## 4. Upgrading safely
@@ -101,7 +102,7 @@ month of use and after any large import; record the date in the backups module.
 - Sign-in and two-factor attempts are rate limited (10 per minute per client, 100 for other
   authentication calls), stored in the database so it holds across restarts and replicas. The
   other pages and server actions are not rate limited; they all require a signed-in user.
-- Tailscale Funnel exposes the app to the public internet; remove the `tailscale_funnel` label for tailnet-only access.
+- The compose file publishes the app on localhost only; TLS termination and public exposure are up to the operator.
 
 ## 8. Change history (by stage)
 
