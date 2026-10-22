@@ -1,7 +1,7 @@
 # Production-style stack: PostgreSQL + one-shot migrations + app.
-# Usage:  cp .env.example .env   (set a strong POSTGRES_PASSWORD)  then  docker compose up -d --build
-# The database is NOT published to the host; only the app is, and only on localhost
-# (put a TLS reverse proxy such as Caddy/Nginx in front for public access).
+# Usage: cp .env.example .env (set a strong POSTGRES_PASSWORD) then docker compose up -d --build
+# The database is NOT published to the host; only the app is, and only on localhost.
+# TSDProxy reaches the app through the shared Docker tailscale network.
 
 name: serverwise
 
@@ -27,7 +27,7 @@ services:
     build: { context: ., target: migrate }
     restart: "no"
     # Also used for one-off admin commands:
-    #   docker compose run --rm migrate pnpm owner:create --email you@example.com --name "Your Name"
+    # docker compose run --rm migrate pnpm owner:create --email you@example.com --name "Your Name"
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-serverwise}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-serverwise}
       AUTH_SECRET: ${AUTH_SECRET:?Set AUTH_SECRET in .env (openssl rand -base64 32)}
@@ -36,8 +36,7 @@ services:
       db: { condition: service_healthy }
     networks: [internal]
 
-  # Raises follow-ups for maintenance visits that are overdue or due soon (idempotent; see
-  # docs/CAREOPS.md). Same code and database as the app, no published port.
+  # Background reminders worker. No published port.
   worker:
     build: { context: ., target: migrate }
     restart: unless-stopped
@@ -60,12 +59,12 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      # Public URL users type in the browser. Must be https:// in production (secure cookies).
+      # Public URL users type in the browser. Must be https:// in production.
       APP_URL: ${APP_URL:-http://localhost:3000}
       AUTH_SECRET: ${AUTH_SECRET:?Set AUTH_SECRET in .env (openssl rand -base64 32)}
       AUTH_TRUSTED_ORIGINS: ${AUTH_TRUSTED_ORIGINS:-}
       REQUIRE_OWNER_2FA: ${REQUIRE_OWNER_2FA:-}
-      # Optional AI assistant (empty = off). The key lives only in .env, never in the database.
+      # Optional AI assistant. The key lives only in .env.
       AI_PROVIDER: ${AI_PROVIDER:-}
       AI_API_KEY: ${AI_API_KEY:-}
       AI_MODEL: ${AI_MODEL:-}
@@ -79,7 +78,15 @@ services:
       migrate: { condition: service_completed_successfully }
     ports:
       - "127.0.0.1:${APP_PORT:-3000}:3000"
-    networks: [internal]
+    labels:
+      tsdproxy.enable: "true"
+      tsdproxy.name: "serverwise"
+      tsdproxy.container_port: "3000"
+      tsdproxy.funnel: "true"
+      tsdproxy.ephemeral: "false"
+    networks:
+      - internal
+      - tailscale
     read_only: true
     tmpfs: [/tmp, /app/.next/cache]
     cap_drop: [ALL]
@@ -87,6 +94,9 @@ services:
 
 networks:
   internal:
+  tailscale:
+    external: true
+    name: tailscale
 
 volumes:
   pgdata:

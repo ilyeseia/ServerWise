@@ -49,8 +49,9 @@ First installation only: copy `.env.example` to `.env`, set `POSTGRES_PASSWORD` 
 docker compose run --rm migrate pnpm owner:create --email you@example.com --name "Your Name"
 ```
 
-The app listens on `127.0.0.1:3000` only. Public access goes through a TLS reverse proxy you run
-(Caddy, Nginx, ...) or an SSH tunnel; there is no proxy or Tailscale network wired into the compose file. `Strict-Transport-Security`
+The app listens on `127.0.0.1:3000` and is also attached to the external Docker network `tailscale`
+(it must exist: `docker network ls`), where tsdproxy publishes it. Without tsdproxy, use a TLS reverse
+proxy or an SSH tunnel. `Strict-Transport-Security`
 is sent by the application; the database is never published.
 
 Lost the owner's temporary password (or any password) and nobody can sign in? On the server:
@@ -111,7 +112,7 @@ month of use and after any large import; record the date in the backups module.
 - Sign-in and two-factor attempts are rate limited (10 per minute per client, 100 for other
   authentication calls), stored in the database so it holds across restarts and replicas. The
   other pages and server actions are not rate limited; they all require a signed-in user.
-- The compose file publishes the app on localhost only; TLS termination and public exposure are up to the operator.
+- `tsdproxy.funnel: "true"` exposes the app to the public internet; remove the label for tailnet-only access.
 
 ## 8. Change history (by stage)
 
