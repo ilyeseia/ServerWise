@@ -63,6 +63,12 @@ docker compose run --rm migrate pnpm user:reset-password --email you@example.com
 It prints a new temporary password once, forces a change at the next sign-in, ends open sessions,
 clears any lockout and writes the reset to the audit log.
 
+To choose the password yourself instead (no copying; it is not forced to change):
+
+```bash
+read -rs PW; printf '%s' "$PW" | docker compose run --rm -T migrate pnpm user:reset-password --email you@example.com --password-stdin; unset PW
+```
+
 ## 4. Upgrading safely
 
 1. **Take a backup first** (runbook: `docs/BACKUP_RESTORE.md`):
