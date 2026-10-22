@@ -3,8 +3,8 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
-// Baseline security headers. A nonce-based Content-Security-Policy is added in
-// Stage 11 (production hardening) together with its verification tests.
+// Baseline security headers for every response. The page Content-Security-Policy carries a
+// per-request nonce, so it is built in src/proxy.ts (see src/server/security/csp.ts).
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },

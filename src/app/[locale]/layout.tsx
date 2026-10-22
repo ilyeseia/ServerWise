@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -34,6 +35,8 @@ export default async function LocaleLayout({ children, params }: Props) {
   if (!isLocale(locale)) notFound();
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "Common" });
+  // The per-request nonce set by the proxy; the theme script below is inline and needs it.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   const session = await getCurrentSession();
   const gated = session
     ? accessGate(session, { require2faForOwner: isOwner2faRequired() }) !== "ok"
@@ -43,7 +46,7 @@ export default async function LocaleLayout({ children, params }: Props) {
     <html lang={locale} dir={localeDirection[locale]} suppressHydrationWarning>
       <body className="min-h-screen antialiased">
         <NextIntlClientProvider>
-          <ThemeProvider>
+          <ThemeProvider nonce={nonce}>
             <a
               href="#main"
               className="sr-only z-50 rounded-md bg-primary px-4 py-2 text-primary-foreground focus:not-sr-only focus:fixed focus:start-4 focus:top-4"

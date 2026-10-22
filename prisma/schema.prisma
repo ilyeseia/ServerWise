@@ -306,6 +306,7 @@ model Lead {
   @@index([status])
   @@index([ownerId])
   @@index([createdAt(sort: Desc)])
+  @@index([closedAt])
   @@map("lead")
 }
 
@@ -613,6 +614,8 @@ model QuoteRevision {
 
   @@unique([quoteId, number])
   @@index([status])
+  @@index([issuedAt])
+  @@index([decidedAt])
   @@map("quote_revision")
 }
 
@@ -994,6 +997,8 @@ model Ticket {
   @@index([customerId])
   @@index([status, priority])
   @@index([assigneeId, status])
+  @@index([createdAt])
+  @@index([resolvedAt])
   @@map("ticket")
 }
 
