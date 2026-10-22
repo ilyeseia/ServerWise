@@ -53,6 +53,15 @@ The app listens on `127.0.0.1:3000` only. Public access goes through a TLS rever
 (Caddy, Nginx, ...) or an SSH tunnel; there is no proxy or Tailscale network wired into the compose file. `Strict-Transport-Security`
 is sent by the application; the database is never published.
 
+Lost the owner's temporary password (or any password) and nobody can sign in? On the server:
+
+```bash
+docker compose run --rm migrate pnpm user:reset-password --email you@example.com
+```
+
+It prints a new temporary password once, forces a change at the next sign-in, ends open sessions,
+clears any lockout and writes the reset to the audit log.
+
 ## 4. Upgrading safely
 
 1. **Take a backup first** (runbook: `docs/BACKUP_RESTORE.md`):
