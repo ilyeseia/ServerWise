@@ -86,7 +86,8 @@ services:
     labels:
       tsdproxy.enable: "true"
       tsdproxy.name: "ServerWise"
-      tsdproxy.port.1: "443/https:3000/http, tailscale_funnel"
+      tsdproxy.container_port: "3000"
+      tsdproxy.funnel: "true"
     read_only: true
     tmpfs: [/tmp, /app/.next/cache]
     cap_drop: [ALL]
