@@ -282,7 +282,22 @@
       "remoteplan_updated": "Modification d'un plan d'accès à distance",
       "remoteplan_approved": "Approbation d'un plan d'accès à distance",
       "remoteplan_retired": "Retrait d'un plan d'accès à distance",
-      "report_exported": "Export d'un rapport"
+      "report_exported": "Export d'un rapport",
+      "deployment_provider_created": "Création d'un fournisseur de déploiement",
+      "deployment_provider_updated": "Modification d'un fournisseur de déploiement",
+      "deployment_job_created": "Création d'une tâche de déploiement",
+      "deployment_job_updated": "Modification d'une tâche de déploiement",
+      "deployment_job_approved": "Approbation d'une tâche de déploiement",
+      "deployment_job_rejected": "Rejet d'une tâche de déploiement",
+      "deployment_job_executed": "Exécution d'une tâche de déploiement",
+      "deployment_job_worker_triggered": "Déclenchement du worker de déploiement",
+      "deployment_job_rollback_started": "Démarrage du rollback d'une tâche de déploiement",
+      "deployment_job_completed": "Achèvement d'une tâche de déploiement",
+      "deployment_job_failed": "Échec d'une tâche de déploiement",
+      "deployment_job_cancelled": "Annulation d'une tâche de déploiement",
+      "deployment_job_rolled_back": "Rollback d'une tâche de déploiement",
+      "deployment_step_created": "Création d'une étape de déploiement",
+      "deployment_step_updated": "Modification d'une étape de déploiement"
     }
   },
   "Settings": {

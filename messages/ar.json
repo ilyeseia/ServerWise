@@ -282,7 +282,22 @@
       "remoteplan_updated": "تعديل خطة وصول عن بُعد",
       "remoteplan_approved": "اعتماد خطة وصول عن بُعد",
       "remoteplan_retired": "إيقاف خطة وصول عن بُعد",
-      "report_exported": "تصدير تقرير"
+      "report_exported": "تصدير تقرير",
+      "deployment_provider_created": "إنشاء مزوّد نشر",
+      "deployment_provider_updated": "تعديل مزوّد نشر",
+      "deployment_job_created": "إنشاء مهمة نشر",
+      "deployment_job_updated": "تعديل مهمة نشر",
+      "deployment_job_approved": "اعتماد مهمة نشر",
+      "deployment_job_rejected": "رفض مهمة نشر",
+      "deployment_job_executed": "تنفيذ مهمة نشر",
+      "deployment_job_worker_triggered": "تشغيل عامل النشر",
+      "deployment_job_rollback_started": "بدء تراجع مهمة نشر",
+      "deployment_job_completed": "اكتمال مهمة نشر",
+      "deployment_job_failed": "فشل مهمة نشر",
+      "deployment_job_cancelled": "إلغاء مهمة نشر",
+      "deployment_job_rolled_back": "تراجع مهمة نشر",
+      "deployment_step_created": "إنشاء خطوة نشر",
+      "deployment_step_updated": "تعديل خطوة نشر"
     }
   },
   "Settings": {

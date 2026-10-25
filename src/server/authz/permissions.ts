@@ -68,6 +68,14 @@ export const PERMISSIONS = [
   "report:financial",
   /** Download a report as CSV. Every export is audited. */
   "report:export",
+  // Deployment Automation (Stage 12).
+  "deployment:read",
+  /** Providers, credentials, and job definitions. */
+  "deployment:write",
+  /** Approve a deployment job for execution. Owner/Infrastructure lead only. */
+  "deployment:approve",
+  /** Execute a deployment job (worker only, but permission exists for audit). */
+  "deployment:execute",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -98,6 +106,10 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "report:read",
     "report:financial",
     "report:export",
+    "deployment:read",
+    "deployment:write",
+    "deployment:approve",
+    "deployment:execute",
   ],
   technician: [
     "dashboard:view",
@@ -121,6 +133,9 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "remote:write",
     "ai:use",
     "report:read",
+    "deployment:read",
+    "deployment:write",
+    "deployment:execute",
   ],
   // The read-only "viewer / accountant" role: reports only, including the money figures.
   viewer: ["dashboard:view", "report:read", "report:financial"],

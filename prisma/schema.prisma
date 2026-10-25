@@ -57,6 +57,8 @@ model User {
   assignedSchedules MaintenanceSchedule[] @relation("ScheduleAssignee")
   assignedTasks     Task[]                @relation("TaskAssignee")
   assignedFollowUps FollowUp[]            @relation("FollowUpAssignee")
+  approvedDeployments DeploymentApproval[] @relation("DeploymentApprovalApprover")
+  rejectedDeployments DeploymentApproval[] @relation("DeploymentApprovalRejecter")
 
   @@map("user")
 }
@@ -250,6 +252,8 @@ model Customer {
   backupPolicies BackupPolicy[]
   remotePlans    RemoteAccessPlan[]
   communications Communication[]
+  deploymentJobs DeploymentJob[]
+  deploymentProviders DeploymentProvider[]
 
   @@index([name])
   @@index([phone])
@@ -703,12 +707,13 @@ model Project {
   createdAt     DateTime      @default(now()) @db.Timestamptz(3)
   updatedAt     DateTime      @default(now()) @updatedAt @db.Timestamptz(3)
 
-  quote      Quote       @relation(fields: [quoteId], references: [id], onDelete: Restrict)
-  lead       Lead        @relation(fields: [leadId], references: [id], onDelete: Restrict)
-  manager    User?       @relation("ProjectManager", fields: [managerId], references: [id], onDelete: SetNull)
-  milestones Milestone[]
-  tasks      Task[]
-  assets     Asset[]
+  quote           Quote               @relation(fields: [quoteId], references: [id], onDelete: Restrict)
+  lead            Lead                @relation(fields: [leadId], references: [id], onDelete: Restrict)
+  manager         User?               @relation("ProjectManager", fields: [managerId], references: [id], onDelete: SetNull)
+  milestones      Milestone[]
+  tasks           Task[]
+  assets          Asset[]
+  deploymentJobs  DeploymentJob[]
 
   @@index([leadId])
   @@index([status])
@@ -1180,4 +1185,248 @@ model AiRequest {
   @@index([userId, createdAt(sort: Desc)])
   @@index([createdAt(sort: Desc)])
   @@map("ai_request")
+}
+
+// ---------------------------------------------------------------------------------------------
+// Deployment Automation (Stage 12)
+// ---------------------------------------------------------------------------------------------
+
+enum DeploymentProviderType {
+  proxmox
+  ssh_ansible
+  docker_engine
+  docker_compose
+  nas_generic
+  custom
+}
+
+enum DeploymentCredentialType {
+  api_token
+  ssh_key
+  username_password
+  oauth_token
+  custom
+}
+
+enum DeploymentJobStatus {
+  pending_approval
+  approved
+  rejected
+  planned
+  executing
+  completed
+  failed
+  cancelled
+  rolling_back
+  rolled_back
+}
+
+enum DeploymentStepStatus {
+  pending
+  running
+  completed
+  failed
+  skipped
+  rolled_back
+}
+
+enum DeploymentStepKind {
+  validation
+  provisioning
+  configuration
+  verification
+  rollback
+  custom
+}
+
+/// A configured deployment provider (Proxmox cluster, SSH host, Docker daemon, etc.).
+/// The actual credentials are stored separately and referenced by credentialId.
+model DeploymentProvider {
+  id          String                @id @default(uuid(7))
+  name        String                @db.VarChar(100)
+  type        DeploymentProviderType
+  /// Base URL or endpoint (e.g., https://proxmox.example.com:8006/api2/json)
+  endpoint    String                @db.VarChar(500)
+  /// Provider-specific configuration (JSON)
+  config      Json
+  /// Whether this provider is active and can be used for new jobs
+  active      Boolean               @default(true)
+  /// Optional: customer this provider is scoped to (null = global/shared)
+  customerId  String?
+  customer    Customer?             @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  createdById String?
+  createdAt   DateTime              @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime              @default(now()) @updatedAt @db.Timestamptz(3)
+
+  credentials DeploymentCredential[]
+  jobs        DeploymentJob[]
+
+  @@index([type])
+  @@index([active])
+  @@index([customerId])
+  @@map("deployment_provider")
+}
+
+/// Credentials for a deployment provider. Never stores raw secrets in the DB;
+/// `secretRef` points to where the secret is kept (e.g., Vault path, env var name, file path).
+/// The worker resolves the secret at execution time.
+model DeploymentCredential {
+  id           String                 @id @default(uuid(7))
+  providerId   String
+  type         DeploymentCredentialType
+  /// Identifier for the credential (e.g., "root", "deploy-user", "api-token-prod")
+  identifier   String                 @db.VarChar(100)
+  /// Reference to where the actual secret is stored (NOT the secret itself)
+  /// Examples: "vault:secret/data/proxmox/root", "env:PROXMOX_API_TOKEN", "file:/run/secrets/proxmox_token"
+  secretRef    String                 @db.VarChar(500)
+  /// Additional metadata (e.g., SSH key fingerprint, token expiry)
+  metadata     Json?
+  active       Boolean                @default(true)
+  createdById  String?
+  createdAt    DateTime               @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime               @default(now()) @updatedAt @db.Timestamptz(3)
+
+  provider DeploymentProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([providerId])
+  @@index([active])
+  @@map("deployment_credential")
+}
+
+/// A deployment job: the execution of a plan against a provider.
+/// Created from a project, a manual trigger, or a scheduled task.
+model DeploymentJob {
+  id              String               @id @default(uuid(7))
+  /// Human-facing number such as D-2026-0001
+  number          String               @unique @db.VarChar(20)
+  providerId      String
+  customerId      String?
+  projectId       String?
+  /// What this job does (e.g., "Deploy Proxmox VM for customer X", "Update Docker stack")
+  title           String               @db.VarChar(300)
+  /// Detailed description
+  description     String?              @db.VarChar(4000)
+  status          DeploymentJobStatus  @default(pending_approval)
+  /// The execution plan (JSON), produced by provider.plan() and reviewed before execution.
+  plan            Json?
+  /// Rollback plan (JSON), produced alongside the execution plan.
+  rollbackPlan    Json?
+  /// Who approved the job (for jobs requiring approval)
+  approvedById    String?
+  approvedAt      DateTime?            @db.Timestamptz(3)
+  /// Who rejected the job
+  rejectedById    String?
+  rejectedAt      DateTime?            @db.Timestamptz(3)
+  rejectionReason String?              @db.VarChar(1000)
+  /// Started/completed timestamps
+  startedAt       DateTime?            @db.Timestamptz(3)
+  completedAt     DateTime?            @db.Timestamptz(3)
+  /// Error message if failed
+  errorMessage    String?              @db.VarChar(2000)
+  /// Idempotency key for safe retries
+  idempotencyKey  String?              @unique @db.VarChar(100)
+  createdById     String?
+  createdAt       DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime             @default(now()) @updatedAt @db.Timestamptz(3)
+
+  provider   DeploymentProvider    @relation(fields: [providerId], references: [id], onDelete: Restrict)
+  customer   Customer?             @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  project    Project?              @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  steps      DeploymentStep[]
+  approvals  DeploymentApproval[]
+
+  @@index([providerId])
+  @@index([customerId])
+  @@index([projectId])
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+  @@map("deployment_job")
+}
+
+/// Per-year counter for deployment job numbers.
+model DeploymentJobCounter {
+  year Int @id
+  last Int
+
+  @@map("deployment_job_counter")
+}
+
+/// An approval record for a deployment job. Multiple approvals can be required.
+model DeploymentApproval {
+  id          String   @id @default(uuid(7))
+  jobId       String
+  /// The role or specific user required to approve (e.g., "owner", "infrastructure_engineer", "user:abc123")
+  requiredBy  String   @db.VarChar(100)
+  /// Who actually approved
+  approvedById String?
+  approvedBy   User?    @relation("DeploymentApprovalApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt   DateTime? @db.Timestamptz(3)
+  /// If rejected
+  rejected    Boolean  @default(false)
+  rejectedById String?
+  rejectedBy   User?    @relation("DeploymentApprovalRejecter", fields: [rejectedById], references: [id], onDelete: SetNull)
+  rejectedAt   DateTime? @db.Timestamptz(3)
+  reason      String?   @db.VarChar(500)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+
+  job DeploymentJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, requiredBy])
+  @@index([jobId])
+  @@map("deployment_approval")
+}
+
+/// A single step in a deployment job. Steps are executed sequentially by the worker.
+model DeploymentStep {
+  id          String               @id @default(uuid(7))
+  jobId       String
+  position    Int
+  kind        DeploymentStepKind
+  /// Human-readable name (e.g., "Validate Proxmox connection", "Create VM", "Configure network")
+  name        String               @db.VarChar(200)
+  /// Step description
+  description String?              @db.VarChar(1000)
+  /// Step-specific input parameters (JSON)
+  input       Json?
+  /// Step output/result (JSON), populated after execution
+  output      Json?
+  status      DeploymentStepStatus @default(pending)
+  /// Error message if failed
+  errorMessage String?             @db.VarChar(2000)
+  /// Started/completed timestamps
+  startedAt   DateTime?            @db.Timestamptz(3)
+  completedAt DateTime?            @db.Timestamptz(3)
+  /// Retry count
+  retryCount  Int                  @default(0)
+  /// Max retries allowed for this step
+  maxRetries  Int                  @default(0)
+  createdAt   DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime             @default(now()) @updatedAt @db.Timestamptz(3)
+
+  job   DeploymentJob    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  logs  DeploymentLog[]
+
+  @@unique([jobId, position])
+  @@index([jobId, position])
+  @@index([status])
+  @@map("deployment_step")
+}
+
+/// Structured log entries for a deployment step (stdout/stderr, structured events).
+/// Append-only, never modified after creation.
+model DeploymentLog {
+  id        String   @id @default(uuid(7))
+  stepId    String
+  /// Log level
+  level     String   @db.VarChar(20) // debug, info, warn, error
+  /// Log message
+  message   String   @db.VarChar(4000)
+  /// Structured metadata (e.g., { "command": "ansible-playbook ...", "exitCode": 0 })
+  metadata  Json?
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  step DeploymentStep @relation(fields: [stepId], references: [id], onDelete: Cascade)
+
+  @@index([stepId, createdAt(sort: Desc)])
+  @@map("deployment_log")
 }

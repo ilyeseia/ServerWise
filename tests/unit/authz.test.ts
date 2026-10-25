@@ -52,6 +52,10 @@ const EXPECTED: Record<Role, Record<Permission, boolean>> = {
     "report:read": true,
     "report:financial": true,
     "report:export": true,
+    "deployment:read": true,
+    "deployment:write": true,
+    "deployment:approve": true,
+    "deployment:execute": true,
   },
   sales: {
     "dashboard:view": true,
@@ -90,6 +94,10 @@ const EXPECTED: Record<Role, Record<Permission, boolean>> = {
     "report:read": true,
     "report:financial": true,
     "report:export": true,
+    "deployment:read": true,
+    "deployment:write": true,
+    "deployment:approve": true,
+    "deployment:execute": true,
   },
   technician: {
     "dashboard:view": true,
@@ -128,6 +136,10 @@ const EXPECTED: Record<Role, Record<Permission, boolean>> = {
     "report:read": true,
     "report:financial": false,
     "report:export": false,
+    "deployment:read": true,
+    "deployment:write": true,
+    "deployment:approve": false,
+    "deployment:execute": true,
   },
   viewer: {
     "dashboard:view": true,
@@ -166,6 +178,10 @@ const EXPECTED: Record<Role, Record<Permission, boolean>> = {
     "report:read": true,
     "report:financial": true,
     "report:export": false,
+    "deployment:read": false,
+    "deployment:write": false,
+    "deployment:approve": false,
+    "deployment:execute": false,
   },
 };
 

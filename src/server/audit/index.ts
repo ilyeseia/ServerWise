@@ -91,6 +91,22 @@ export const AUDIT_ACTIONS = [
   "remoteplan.approved",
   "remoteplan.retired",
   "report.exported",
+  // Deployment Automation (Stage 12)
+  "deployment_provider.created",
+  "deployment_provider.updated",
+  "deployment_job.created",
+  "deployment_job.updated",
+  "deployment_job.approved",
+  "deployment_job.rejected",
+  "deployment_job.executed",
+  "deployment_job.worker_triggered",
+  "deployment_job.rollback_started",
+  "deployment_job.completed",
+  "deployment_job.failed",
+  "deployment_job.cancelled",
+  "deployment_job.rolled_back",
+  "deployment_step.created",
+  "deployment_step.updated",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
