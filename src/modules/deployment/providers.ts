@@ -10,9 +10,16 @@ import type {
   DeploymentStepKind,
   ExecutionPlan,
   ProviderConfig,
-  StepInput,
 } from "./rules";
-import { validateProviderConfig, validateExecutionPlan } from "./rules";
+import {
+  validateProviderConfig,
+  validateExecutionPlan,
+} from "./rules";
+import { RealProxmoxProvider } from "./providers/realProxmox";
+import { RealSshAnsibleProvider } from "./providers/realSshAnsible";
+import { RealDockerEngineProvider } from "./providers/realDockerEngine";
+import { RealDockerComposeProvider } from "./providers/realDockerCompose";
+import { RealNasGenericProvider } from "./providers/realNasGeneric";
 
 /**
  * Provider execution context - passed to all provider methods.
@@ -703,11 +710,11 @@ export class MockNasGenericProvider extends BaseProvider {
  * In Stage 13, real implementations will be registered here.
  */
 export const providerRegistry = new Map<DeploymentProviderType, DeploymentProvider>([
-  ["proxmox", new MockProxmoxProvider()],
-  ["ssh_ansible", new MockSshAnsibleProvider()],
-  ["docker_engine", new MockDockerEngineProvider()],
-  ["docker_compose", new MockDockerComposeProvider()],
-  ["nas_generic", new MockNasGenericProvider()],
+  ["proxmox", new RealProxmoxProvider()],
+  ["ssh_ansible", new RealSshAnsibleProvider()],
+  ["docker_engine", new RealDockerEngineProvider()],
+  ["docker_compose", new RealDockerComposeProvider()],
+  ["nas_generic", new RealNasGenericProvider()],
 ]);
 
 /**

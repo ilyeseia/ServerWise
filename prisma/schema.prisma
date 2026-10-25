@@ -59,6 +59,7 @@ model User {
   assignedFollowUps FollowUp[]            @relation("FollowUpAssignee")
   approvedDeployments DeploymentApproval[] @relation("DeploymentApprovalApprover")
   rejectedDeployments DeploymentApproval[] @relation("DeploymentApprovalRejecter")
+  reportSchedules   ReportSchedule[]       @relation("ReportScheduleUser")
 
   @@map("user")
 }
@@ -1429,4 +1430,24 @@ model DeploymentLog {
 
   @@index([stepId, createdAt(sort: Desc)])
   @@map("deployment_log")
+}
+
+/// Schedule for automated report generation.
+model ReportSchedule {
+  id              String    @id @default(uuid(7))
+  userId          String
+  templateId      String
+  cronExpression  String    // e.g., "0 9 * * 1" for Mondays at 9AM
+  nextRunAt       DateTime? @db.Timestamptz(3)
+  lastRunAt       DateTime? @db.Timestamptz(3)
+  status          String    @default("active") // active, paused, completed
+  recipientEmails String?   // JSON array of email strings
+  createdAt       DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime  @default(now()) @updatedAt @db.Timestamptz(3)
+
+  user User    @relation("ReportScheduleUser", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([cronExpression])
+  @@map("report_schedule")
 }
